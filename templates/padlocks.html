@@ -225,9 +225,9 @@
         <table class="threshold-table">
           <thead><tr><th>Value</th><th>Risk</th></tr></thead>
           <tbody>
-            <tr {% if v6 < 15 %}class="thresh-active"{% endif %}><td>&lt; 15%</td><td><span class="risk-badge risk-L">L</span></td></tr>
-            <tr {% if 15 <= v6 < 30 %}class="thresh-active"{% endif %}><td>15 – 29%</td><td><span class="risk-badge risk-M">M</span></td></tr>
             <tr {% if v6 >= 30 %}class="thresh-active"{% endif %}><td>≥ 30%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+            <tr {% if 15 <= v6 < 30 %}class="thresh-active"{% endif %}><td>15 – 29%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v6 < 15 %}class="thresh-active"{% endif %}><td>&lt; 15%</td><td><span class="risk-badge risk-L">L</span></td></tr>
           </tbody>
         </table>
       </div>
