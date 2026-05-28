@@ -146,11 +146,26 @@ def padlocks_detail():
         rob = RiskofBias(json_extractor)
         rob.compile()
         df, _ = rob.padlocks(save_file=False)
-        # Convert pandas Categoricals and numpy types to plain Python
-        row = {k: (str(v) if hasattr(v, 'categories') else
-                   (int(v) if hasattr(v, 'item') and isinstance(v.item(), int) else
-                    (float(round(v.item(), 2)) if hasattr(v, 'item') else v)))
-               for k, v in df.iloc[0].to_dict().items()}
+
+        # Serialise through JSON to normalise all pandas/numpy types to plain Python
+        row = json_module.loads(df.to_json(orient="records"))[0]
+
+        # Extra stats not kept in the padlocks output — compute from risk_of_bias_df
+        # (padlocks() already coerced these columns to numeric in-place)
+        rdf = rob.risk_of_bias_df
+        extras = [
+            ("sample_analysed_info", "total_pupil_number", "sum"),
+            ("eco_valid_risk_value",  "mean_eco_valid_risk",  "mean"),
+            ("school_treat_info",     "median_school_number", "median"),
+            ("class_total_info",      "median_class_number",  "median"),
+        ]
+        for col, key, agg in extras:
+            try:
+                val = getattr(pd.to_numeric(rdf[col], errors="coerce"), agg)()
+                row[key] = int(val) if key == "total_pupil_number" else round(float(val), 2)
+            except Exception:
+                row[key] = 0
+
         return render_template("padlocks.html", data=row)
     except Exception as exc:
         flash(f"Padlocks calculation failed: {exc}")

@@ -4642,7 +4642,7 @@ class RiskofBias:
 
     def padlocks(self, save_file=True):
 
-        # % studies since year 2000 
+        # % studies since year 2010 
         """ number_of_studies = len(self.risk_of_bias_df)
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
         recent_studies = len(self.risk_of_bias_df[self.risk_of_bias_df["pub_year"] > 2000])
@@ -4650,7 +4650,7 @@ class RiskofBias:
         perc_recent = np.round(perc_recent, 2) """
 
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
-        perc_recent = (self.risk_of_bias_df["pub_year"] > 2000).mean() * 100
+        perc_recent = (self.risk_of_bias_df["pub_year"] > 2010).mean() * 100
         perc_recent = round(perc_recent, 2)
 
         #print(f"perc_recent: {perc_recent}")
@@ -4981,16 +4981,14 @@ class RiskofBias:
         df["number_of_studies_padlock_scale"] = pd.to_numeric(df["number_of_studies_padlock_scale"], errors='coerce').fillna(0)
         df["New_padlock"] = df["number_of_studies_padlock_scale"]
 
-        conditions = [
-            (df["%_randomised_padlock_scale"] == "H"),
-            (df["%_high_eco_valid_padlock_scale"] == "H"),
-            (df["%_indep_eval_padlock_scale"] == "H"),
-            (df["%_since_2000_padlock_scale"] == "H"),
-            (df["%_median_attrit_reported_padlock_scale"] == "H")
-        ]
-        choices = [-1, -1, -1, -1, -1]
-
-        df["New_padlock"] = df["New_padlock"] + np.select(conditions, choices, default=0)
+        deductions = (
+            (df["%_randomised_padlock_scale"] == "H").astype(int) +
+            (df["%_high_eco_valid_padlock_scale"] == "H").astype(int) +
+            (df["%_indep_eval_padlock_scale"] == "H").astype(int) +
+            (df["%_since_2000_padlock_scale"] == "H").astype(int) +
+            (df["%_median_attrit_reported_padlock_scale"] == "H").astype(int)
+        )
+        df["New_padlock"] = (df["New_padlock"] - deductions).clip(lower=0)
 
 
         df = df[[
