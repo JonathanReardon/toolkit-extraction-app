@@ -208,6 +208,7 @@ def extract():
         return redirect(url_for("index"))
 
     strand = request.form.get("strand", "")
+    clean_cols = request.form.get("clean_cols", "1") == "1"
     if option == "6" and strand not in STRAND_OPTIONS:
         flash("Please select a strand for the Main Analysis dataframe.")
         return redirect(url_for("index"))
@@ -230,22 +231,22 @@ def extract():
         dfc = DataFrameCompilation(json_extractor)
 
         if option == "1":
-            df, _ = dfc.make_dataframe_1(save_file=False, verbose=False)
+            df, _ = dfc.make_dataframe_1(save_file=False, verbose=False, clean_cols=clean_cols)
         elif option == "2":
-            df, _ = dfc.make_dataframe_2(save_file=False, verbose=False)
+            df, _ = dfc.make_dataframe_2(save_file=False, verbose=False, clean_cols=clean_cols)
         elif option == "3":
-            df, _ = dfc.make_dataframe_3(save_file=False, verbose=False)
+            df, _ = dfc.make_dataframe_3(save_file=False, verbose=False, clean_cols=clean_cols)
         elif option == "4":
-            result = dfc.make_dataframe_4(save_file=False, verbose=False)
+            result = dfc.make_dataframe_4(save_file=False, verbose=False, clean_cols=clean_cols)
             df = result[0] if result else None
         elif option == "5":
-            df, _ = dfc.make_dataframe_5(save_file=False, verbose=False)
+            df, _ = dfc.make_dataframe_5(save_file=False, verbose=False, clean_cols=clean_cols)
         elif option == "6":
             ss = StrandSpecificFrames(json_extractor)
             ss_df = ss.strand_specific_df_selection(int(strand))
             df, _ = dfc.make_dataframe_6(ss_df, save_file=False)
         elif option == "7":
-            result = dfc.make_dataframe_7(save_file=False, verbose=False)
+            result = dfc.make_dataframe_7(save_file=False, verbose=False, clean_cols=clean_cols)
             df = result[0] if result else None
         elif option == "8":
             rob = RiskofBias(json_extractor)
@@ -554,6 +555,93 @@ def dashboard_view(token):
     except Exception as exc:
         flash(f"Dashboard failed: {exc}")
         return redirect(url_for("dashboard"))
+
+
+# ── Extraction preview pages ──────────────────────────────────────────────────
+
+@app.route("/preview/<int:option>")
+def preview(option):
+    if option == 9:
+        return redirect(url_for("padlocks_detail"))
+
+    _, filepath, _ = _session_file()
+    if not filepath:
+        flash("Please load a JSON file first.")
+        return redirect(url_for("index"))
+
+    option_str = str(option)
+    if option_str not in DATAFRAME_OPTIONS:
+        flash("Invalid option.")
+        return redirect(url_for("index"))
+
+    strand_key = request.args.get("strand")
+    # Default clean_cols to match function defaults (True for 4/5, False for others)
+    clean_cols_default = option in (4, 5)
+    clean_cols = request.args.get("clean_cols", "1" if clean_cols_default else "0") == "1"
+    supports_clean_cols = option in (1, 2, 3, 4, 5, 7)
+
+    if option == 6 and not strand_key:
+        return render_template("preview.html",
+                               records=None, columns=None,
+                               option=option,
+                               option_label=DATAFRAME_OPTIONS[option_str]["label"],
+                               strand=None, strands=STRAND_OPTIONS,
+                               needs_strand=True, row_count=0, col_count=0,
+                               clean_cols=clean_cols,
+                               supports_clean_cols=supports_clean_cols)
+
+    try:
+        json_extractor = JSONDataExtractor(filepath)
+        dfc = DataFrameCompilation(json_extractor)
+
+        if option == 1:
+            df, _ = dfc.make_dataframe_1(save_file=False, verbose=False, clean_cols=clean_cols)
+        elif option == 2:
+            df, _ = dfc.make_dataframe_2(save_file=False, verbose=False, clean_cols=clean_cols)
+        elif option == 3:
+            df, _ = dfc.make_dataframe_3(save_file=False, verbose=False, clean_cols=clean_cols)
+        elif option == 4:
+            result = dfc.make_dataframe_4(save_file=False, verbose=False, clean_cols=clean_cols)
+            df = result[0] if result else None
+        elif option == 5:
+            df, _ = dfc.make_dataframe_5(save_file=False, verbose=False, clean_cols=clean_cols)
+        elif option == 6:
+            ss = StrandSpecificFrames(json_extractor)
+            ss_df = ss.strand_specific_df_selection(int(strand_key))
+            df, _ = dfc.make_dataframe_6(ss_df, save_file=False)
+        elif option == 7:
+            result = dfc.make_dataframe_7(save_file=False, verbose=False, clean_cols=clean_cols)
+            df = result[0] if result else None
+        elif option == 8:
+            rob = RiskofBias(json_extractor)
+            rob.compile()
+            df = rob.risk_of_bias_df
+        elif option == 10:
+            df, _ = dfc.make_references(save_file=False)
+        else:
+            flash("Unsupported option.")
+            return redirect(url_for("index"))
+
+        if df is None or df.empty:
+            flash("Extraction returned no data.")
+            return redirect(url_for("index"))
+
+        records = json_module.loads(df.to_json(orient="records"))
+        columns = list(df.columns)
+
+        return render_template("preview.html",
+                               records=records, columns=columns,
+                               option=option,
+                               option_label=DATAFRAME_OPTIONS[option_str]["label"],
+                               strand=strand_key, strands=STRAND_OPTIONS,
+                               needs_strand=False,
+                               clean_cols=clean_cols,
+                               supports_clean_cols=supports_clean_cols,
+                               row_count=len(df), col_count=len(df.columns))
+
+    except Exception as exc:
+        flash(f"Preview failed: {exc}")
+        return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

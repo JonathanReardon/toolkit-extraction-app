@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Padlock Score – EEF Toolkit Extractor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
   <div class="container" style="max-width:1100px">
@@ -66,21 +67,6 @@
         <span class="risk-badge risk-H">H</span> (High risk).
         The minimum score is 0 (or 1 if there are more than 9 studies).
       </p>
-      <div class="padlock-formula">
-        <span class="formula-part formula-base">Base (N studies)</span>
-        <span class="formula-op">−</span>
-        <span class="formula-part formula-mod">1 if % since 2000 = H</span>
-        <span class="formula-op">−</span>
-        <span class="formula-part formula-mod">1 if % randomised = H</span>
-        <span class="formula-op">−</span>
-        <span class="formula-part formula-mod">1 if % eco. valid = H</span>
-        <span class="formula-op">−</span>
-        <span class="formula-part formula-mod">1 if % indep. eval = H</span>
-        <span class="formula-op">−</span>
-        <span class="formula-part formula-mod">1 if % attrition = H</span>
-        <span class="formula-op">=</span>
-        <span class="formula-part formula-result">{{ data.New_padlock|int }} padlocks</span>
-      </div>
     </div>
 
     <!-- Metric cards (horizontal scroll) -->
@@ -232,30 +218,150 @@
         </table>
       </div>
 
+      <!-- Score Journey Chart (ApexCharts) -->
+      {% set base = data.number_of_studies_padlock_scale|int %}
+      {% set r_h  = data['%_randomised_padlock_scale']|string == 'H' %}
+      {% set e_h  = data['%_high_eco_valid_padlock_scale']|string == 'H' %}
+      {% set i_h  = data['%_indep_eval_padlock_scale']|string == 'H' %}
+      {% set s_h  = data['%_since_2000_padlock_scale']|string == 'H' %}
+      {% set a_h  = data['%_median_attrit_reported_padlock_scale']|string == 'H' %}
+      {% set sc0 = base %}
+      {% set sc1 = [sc0 - (1 if s_h else 0), 0]|max %}
+      {% set sc2 = [sc1 - (1 if r_h else 0), 0]|max %}
+      {% set sc3 = [sc2 - (1 if e_h else 0), 0]|max %}
+      {% set sc4 = [sc3 - (1 if i_h else 0), 0]|max %}
+      {% set sc5 = [sc4 - (1 if a_h else 0), 0]|max %}
+
+      <div class="metric-card metric-card--journey">
+        <div class="metric-card-role">Score journey</div>
+        <div class="metric-card-title">How the padlock score changed step by step</div>
+        <div id="journey-chart"></div>
+      </div>
+
+      <script>
+      (function() {
+        var scores = [{{ sc0 }}, {{ sc1 }}, {{ sc2 }}, {{ sc3 }}, {{ sc4 }}, {{ sc5 }}, {{ sc5 }}];
+        var isH    = [false, {{ s_h|lower }}, {{ r_h|lower }}, {{ e_h|lower }}, {{ i_h|lower }}, {{ a_h|lower }}, false];
+        var labels = ['Base', '% Since 2000', '% Randomised', '% Eco. Validity', '% Indep. Eval.', 'Median % Attrit.', 'Final'];
+
+        var markerColors = scores.map(function(_, i) {
+          if (i === 0) return '#546e7a';
+          if (i === labels.length - 1) return '#fc5424';
+          return isH[i] ? '#e74c3c' : '#d0d0d0';
+        });
+
+        var markerSizes = scores.map(function(_, i) {
+          if (i === 0 || i === labels.length - 1) return 9;
+          return isH[i] ? 8 : 5;
+        });
+
+        var xLabelColors = scores.map(function(_, i) {
+          if (i === 0) return '#546e7a';
+          if (i === labels.length - 1) return '#fc5424';
+          return isH[i] ? '#c0392b' : '#aaa';
+        });
+
+        var annotations = [];
+        scores.forEach(function(s, i) {
+          if (i === 0 || i === labels.length - 1 || isH[i]) {
+            annotations.push({
+              x: labels[i], y: s,
+              marker: { size: 0 },
+              label: {
+                text: String(s),
+                borderColor: 'transparent',
+                style: {
+                  background: 'transparent',
+                  color: i === 0 ? '#546e7a' : (i === labels.length - 1 ? '#fc5424' : '#c0392b'),
+                  fontSize: (i === 0 || i === labels.length - 1) ? '16px' : '13px',
+                  fontWeight: '800',
+                  padding: { top: 0, bottom: 0, left: 0, right: 0 }
+                },
+                offsetY: -28
+              }
+            });
+          }
+          if (isH[i]) {
+            annotations.push({
+              x: labels[i], y: s,
+              marker: { size: 0 },
+              label: {
+                text: '−1',
+                borderColor: '#fcc',
+                style: {
+                  background: '#fde8e8',
+                  color: '#c0392b',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  padding: { top: 3, bottom: 3, left: 8, right: 8 }
+                },
+                offsetY: -10,
+                offsetX: 28
+              }
+            });
+          }
+        });
+
+        new ApexCharts(document.getElementById('journey-chart'), {
+          chart: {
+            type: 'area',
+            height: 260,
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            animations: { enabled: true, easing: 'easeinout', speed: 700 },
+            dropShadow: { enabled: true, top: 8, blur: 12, opacity: 0.08 }
+          },
+          series: [{ name: 'Padlock Score', data: scores }],
+          colors: ['#fc5424'],
+          stroke: { curve: 'straight', width: 3.5 },
+          fill: {
+            type: 'gradient',
+            gradient: { shadeIntensity: 1, opacityFrom: 0.22, opacityTo: 0.01, stops: [0, 95] }
+          },
+          dataLabels: { enabled: false },
+          markers: {
+            size: markerSizes,
+            colors: markerColors,
+            strokeColors: '#fff',
+            strokeWidth: 2.5,
+            hover: { sizeOffset: 2 }
+          },
+          xaxis: {
+            categories: labels,
+            labels: {
+              rotate: -35,
+              rotateAlways: true,
+              style: { fontSize: '12px', fontWeight: '600', colors: xLabelColors },
+              offsetY: 2
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+          },
+          yaxis: {
+            min: 0, max: 5, tickAmount: 5,
+            labels: { formatter: function(v) { return Math.round(v); }, style: { colors: ['#ccc'], fontSize: '11px' } }
+          },
+          grid: {
+            borderColor: '#f0f0f0',
+            strokeDashArray: 4,
+            yaxis: { lines: { show: true } },
+            xaxis: { lines: { show: false } },
+            padding: { top: 30, bottom: 10 }
+          },
+          tooltip: {
+            theme: 'light',
+            y: { formatter: function(v) { return v + ' padlock' + (v === 1 ? '' : 's'); } }
+          },
+          xaxis: { tooltip: { enabled: false } },
+          annotations: { points: annotations },
+          legend: { show: false }
+        }).render();
+      })();
+      </script>
+
     </div><!-- /metric-row -->
 
-    <!-- Additional summary figures -->
-    <h2 style="font-size:1rem;color:#555;margin:2rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
-      Additional figures (not used in score)
-    </h2>
-    <div class="extra-stats">
-      <div class="extra-stat">
-        <div class="extra-stat-value">{{ data.total_pupil_number|int }}</div>
-        <div class="extra-stat-label">Total pupils across all studies</div>
-      </div>
-      <div class="extra-stat">
-        <div class="extra-stat-value">{{ data.mean_eco_valid_risk }}</div>
-        <div class="extra-stat-label">Mean eco. validity risk value</div>
-      </div>
-      <div class="extra-stat">
-        <div class="extra-stat-value">{{ data.median_school_number }}</div>
-        <div class="extra-stat-label">Median intervention schools</div>
-      </div>
-      <div class="extra-stat">
-        <div class="extra-stat-value">{{ data.median_class_number }}</div>
-        <div class="extra-stat-label">Median class number</div>
-      </div>
-    </div>
 
   </div>
 </body>

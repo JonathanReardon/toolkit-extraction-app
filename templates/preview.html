@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ option_label }} – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container" style="max-width:1300px">
+
+    {% include '_file_bar.html' %}
+
+    <div class="preview-header">
+      <div>
+        <a href="{{ url_for('index') }}" class="back-link">← Back to extractions</a>
+        <h1 style="margin:.3rem 0 .2rem">{{ option_label }}</h1>
+        {% if row_count %}
+        <p style="color:#666;font-size:.9rem;margin:0">{{ row_count }} rows &middot; {{ col_count }} columns</p>
+        {% endif %}
+      </div>
+      {% if records %}
+      <form method="POST" action="{{ url_for('extract') }}" style="margin:0">
+        <input type="hidden" name="option" value="{{ option }}">
+        {% if strand %}<input type="hidden" name="strand" value="{{ strand }}">{% endif %}
+        {% if clean_cols %}<input type="hidden" name="clean_cols" value="1">{% endif %}
+        <button type="submit" class="btn-extract" style="padding:.6rem 1.4rem;font-size:.9rem">
+          ↓ Download CSV
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if needs_strand %}
+    <div class="padlock-note padlock-note--info" style="margin-bottom:1.25rem">
+      ℹ This extraction is strand-specific. Select a strand below to view the data.
+    </div>
+    <form method="GET" action="{{ url_for('preview', option=option) }}" class="extract-form" style="margin-bottom:1.5rem">
+      <div class="form-group" id="strand-group" style="display:flex">
+        <label for="strand">Strand</label>
+        <select id="strand" name="strand" class="strand-select">
+          <optgroup label="Main Toolkit">
+            {% for key, name in strands.items() %}
+              {% if key|int <= 26 %}
+                <option value="{{ key }}" {% if strand == key %}selected{% endif %}>{{ name }}</option>
+              {% endif %}
+            {% endfor %}
+          </optgroup>
+          <optgroup label="Early Years Toolkit">
+            {% for key, name in strands.items() %}
+              {% if key|int >= 27 %}
+                <option value="{{ key }}" {% if strand == key %}selected{% endif %}>{{ name }}</option>
+              {% endif %}
+            {% endfor %}
+          </optgroup>
+        </select>
+        <button type="submit" class="btn-extract" style="margin-left:.75rem;padding:.6rem 1.2rem;font-size:.9rem">
+          Load →
+        </button>
+      </div>
+    </form>
+    {% endif %}
+
+    {% if supports_clean_cols|default(false) %}
+    <form method="GET" action="{{ url_for('preview', option=option) }}" class="clean-cols-form">
+      {% if strand %}<input type="hidden" name="strand" value="{{ strand }}">{% endif %}
+      <label class="clean-cols-label">
+        <input type="checkbox" name="clean_cols" value="1"
+               {% if clean_cols %}checked{% endif %}
+               onchange="this.form.submit()">
+        Include <code>_CLEAN</code> columns
+        <span class="clean-cols-hint">— empty spacer columns for data checking/correction</span>
+      </label>
+    </form>
+    {% endif %}
+
+    {% if records %}
+    <div class="preview-table-wrap">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            {% for col in columns %}
+            <th>{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in records %}
+          <tr>
+            {% for col in columns %}
+            <td>{{ row[col] if row[col] is not none and row[col] != 'None' else '' }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif not needs_strand %}
+    <p style="color:#999;margin-top:2rem">No data returned for this extraction.</p>
+    {% endif %}
+
+  </div>
+</body>
+</html>
