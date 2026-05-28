@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EEF Toolkit Data Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>EEF Toolkit Data Extractor</h1>
+      <p class="subtitle">Upload an EPPI-Reviewer JSON export and download the extracted dataset as CSV.</p>
+    </header>
+
+    {% include '_file_bar.html' %}
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('extract') }}" enctype="multipart/form-data" class="extract-form">
+
+      <div class="form-group">
+        <label>Extraction type</label>
+        <div class="option-grid">
+          {% for key, opt in options.items() %}
+            <label class="option-card">
+              <input type="radio" name="option" value="{{ key }}" {% if loop.first %}checked{% endif %} />
+              <span class="option-label">{{ opt.label }}</span>
+              {% if key == "9" %}
+                <a href="{{ url_for('padlocks_detail') }}" class="option-info-link"
+                   title="View calculation details" onclick="event.stopPropagation()">ℹ</a>
+              {% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group" id="strand-group" style="display:none">
+        <label for="strand">Strand</label>
+        <select id="strand" name="strand" class="strand-select">
+          <optgroup label="Main Toolkit">
+            {% for key, name in strands.items() %}
+              {% if key|int <= 26 %}
+                <option value="{{ key }}">{{ name }}</option>
+              {% endif %}
+            {% endfor %}
+          </optgroup>
+          <optgroup label="Early Years Toolkit">
+            {% for key, name in strands.items() %}
+              {% if key|int >= 27 %}
+                <option value="{{ key }}">{{ name }}</option>
+              {% endif %}
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-extract"
+              {% if not session_file_name %}disabled title="Load a file above first"{% endif %}>
+        Extract &amp; Download CSV
+      </button>
+    </form>
+
+    <div class="custom-link">
+      <a href="{{ url_for('custom') }}">Custom column selection →</a>
+      <span style="margin:0 .75rem;color:#ccc">|</span>
+      <a href="{{ url_for('study') }}">Study browser →</a>
+      <span style="margin:0 .75rem;color:#ccc">|</span>
+      <a href="{{ url_for('dashboard') }}">Dashboard →</a>
+    </div>
+
+    <script>
+      document.querySelectorAll('input[name="option"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          document.getElementById('strand-group').style.display =
+            this.value === '6' ? 'flex' : 'none';
+        });
+      });
+    </script>
+  </div>
+</body>
+</html>

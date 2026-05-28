@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Padlock Score – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container" style="max-width:1100px">
+
+    {% include '_file_bar.html' %}
+
+    <!-- Top bar -->
+    <div class="padlock-topbar">
+      <div>
+        <a href="{{ url_for('index') }}" class="back-link" style="margin:0 0 .4rem">← Back to extractions</a>
+        <h1 style="margin:.3rem 0 .2rem">Padlock Score</h1>
+        <p style="color:#666;font-size:.9rem;margin:0">
+          {{ data.strand }} &mdash;
+          {{ data.number_of_studies|int }} studies
+        </p>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+        <!-- Padlock icons -->
+        <div class="padlock-icons">
+          {% set score = data.New_padlock|int %}
+          {% for i in range(5) %}
+            <div class="padlock-icon {% if i < score %}padlock-on{% else %}padlock-off{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="11" width="18" height="12" rx="2"
+                      fill="{% if i < score %}#fc5424{% else %}#d0d0d0{% endif %}"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"
+                      stroke="{% if i < score %}#fc5424{% else %}#d0d0d0{% endif %}"
+                      stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                {% if i < score %}
+                <circle cx="12" cy="16" r="1.5" fill="white"/>
+                {% endif %}
+              </svg>
+            </div>
+          {% endfor %}
+          <div class="padlock-score-label">{{ score }} / 5</div>
+        </div>
+
+        <a href="{{ url_for('padlocks_download') }}" class="btn-extract"
+           style="padding:.6rem 1.4rem;font-size:.9rem;text-decoration:none">
+          ↓ Download CSV
+        </a>
+      </div>
+    </div>
+
+    <!-- MA floor note -->
+    {% if data.MA_floor %}
+    <div class="padlock-note padlock-note--info">
+      ℹ Floor applied: this strand has more than 9 studies, so the score cannot fall below 1 even if all risk indicators are High.
+    </div>
+    {% endif %}
+
+    <!-- How it works -->
+    <div class="padlock-explainer-box">
+      <h2>How the score is calculated</h2>
+      <p>
+        The padlock score starts from a <strong>base score (0–5)</strong> determined by the total number of studies in the evidence base.
+        One padlock is then <strong>deducted</strong> for each of the five secondary risk indicators rated
+        <span class="risk-badge risk-H">H</span> (High risk).
+        The minimum score is 0 (or 1 if there are more than 9 studies).
+      </p>
+      <div class="padlock-formula">
+        <span class="formula-part formula-base">Base (N studies)</span>
+        <span class="formula-op">−</span>
+        <span class="formula-part formula-mod">1 if % since 2000 = H</span>
+        <span class="formula-op">−</span>
+        <span class="formula-part formula-mod">1 if % randomised = H</span>
+        <span class="formula-op">−</span>
+        <span class="formula-part formula-mod">1 if % eco. valid = H</span>
+        <span class="formula-op">−</span>
+        <span class="formula-part formula-mod">1 if % indep. eval = H</span>
+        <span class="formula-op">−</span>
+        <span class="formula-part formula-mod">1 if % attrition = H</span>
+        <span class="formula-op">=</span>
+        <span class="formula-part formula-result">{{ data.New_padlock|int }} padlocks</span>
+      </div>
+    </div>
+
+    <!-- Metric cards (horizontal scroll) -->
+    <h2 style="font-size:1rem;color:#555;margin:1.5rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
+      Metric breakdown
+    </h2>
+    <div class="metric-row">
+
+      <!-- Card 1: Number of Studies (base) -->
+      {% set n = data.number_of_studies|int %}
+      <div class="metric-card metric-card--base">
+        <div class="metric-card-role">Base score</div>
+        <div class="metric-card-title">Number of Studies</div>
+        <div class="metric-card-value">{{ n }}</div>
+        <div class="metric-card-badge badge-scale">{{ data.number_of_studies_padlock_scale }} padlock{{ 's' if data.number_of_studies_padlock_scale != '1' }}</div>
+        <div class="metric-card-desc">
+          The total number of studies in the evidence base. A larger evidence base gives more confidence in the overall effect estimate and sets the starting padlock count.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Studies</th><th>Score</th></tr></thead>
+          <tbody>
+            <tr {% if n < 10 %}class="thresh-active"{% endif %}><td>&lt; 10</td><td>0 🔒</td></tr>
+            <tr {% if 10 <= n < 25 %}class="thresh-active"{% endif %}><td>10 – 24</td><td>1 🔒</td></tr>
+            <tr {% if 25 <= n < 35 %}class="thresh-active"{% endif %}><td>25 – 34</td><td>2 🔒</td></tr>
+            <tr {% if 35 <= n < 60 %}class="thresh-active"{% endif %}><td>35 – 59</td><td>3 🔒</td></tr>
+            <tr {% if 60 <= n < 90 %}class="thresh-active"{% endif %}><td>60 – 89</td><td>4 🔒</td></tr>
+            <tr {% if n >= 90 %}class="thresh-active"{% endif %}><td>≥ 90</td><td>5 🔒</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card 2: % Since 2000 -->
+      {% set v2 = data['%_since_2000']|float %}
+      {% set r2 = data['%_since_2000_padlock_scale']|string %}
+      <div class="metric-card {% if r2 == 'H' %}metric-card--high{% endif %}">
+        <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
+        <div class="metric-card-title">% Published Since 2000</div>
+        <div class="metric-card-value">{{ v2 }}%</div>
+        <div class="metric-card-badge">
+          <span class="risk-badge risk-{{ r2 }}">{{ r2 }}</span>
+          {% if r2 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
+        </div>
+        <div class="metric-card-desc">
+          Percentage of studies published in or after 2000. More recent studies are more likely to reflect current teaching practices and pupil populations.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Value</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr {% if v2 < 25 %}class="thresh-active"{% endif %}><td>&lt; 25%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+            <tr {% if 25 <= v2 < 50 %}class="thresh-active"{% endif %}><td>25 – 49%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v2 >= 50 %}class="thresh-active"{% endif %}><td>≥ 50%</td><td><span class="risk-badge risk-L">L</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card 3: % Randomised -->
+      {% set v3 = data['%_randomised']|float %}
+      {% set r3 = data['%_randomised_padlock_scale']|string %}
+      <div class="metric-card {% if r3 == 'H' %}metric-card--high{% endif %}">
+        <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
+        <div class="metric-card-title">% Randomised</div>
+        <div class="metric-card-value">{{ v3 }}%</div>
+        <div class="metric-card-badge">
+          <span class="risk-badge risk-{{ r3 }}">{{ r3 }}</span>
+          {% if r3 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
+        </div>
+        <div class="metric-card-desc">
+          Percentage of studies using a randomised controlled trial (RCT) design. Randomisation reduces selection bias and strengthens causal inference about the intervention's effect.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Value</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr {% if v3 < 30 %}class="thresh-active"{% endif %}><td>&lt; 30%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+            <tr {% if 30 <= v3 < 60 %}class="thresh-active"{% endif %}><td>30 – 59%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v3 >= 60 %}class="thresh-active"{% endif %}><td>≥ 60%</td><td><span class="risk-badge risk-L">L</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card 4: % High Ecological Validity -->
+      {% set v4 = data['%_high_eco_valid']|float %}
+      {% set r4 = data['%_high_eco_valid_padlock_scale']|string %}
+      <div class="metric-card {% if r4 == 'H' %}metric-card--high{% endif %}">
+        <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
+        <div class="metric-card-title">% High Ecological Validity</div>
+        <div class="metric-card-value">{{ v4 }}%</div>
+        <div class="metric-card-badge">
+          <span class="risk-badge risk-{{ r4 }}">{{ r4 }}</span>
+          {% if r4 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
+        </div>
+        <div class="metric-card-desc">
+          Percentage of studies conducted in real-world educational settings rather than highly controlled conditions, making findings more applicable to typical classrooms.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Value</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr {% if v4 < 50 %}class="thresh-active"{% endif %}><td>&lt; 50%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+            <tr {% if 50 <= v4 < 75 %}class="thresh-active"{% endif %}><td>50 – 74%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v4 >= 75 %}class="thresh-active"{% endif %}><td>≥ 75%</td><td><span class="risk-badge risk-L">L</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card 5: % Independently Evaluated -->
+      {% set v5 = data['%_indep_eval']|float %}
+      {% set r5 = data['%_indep_eval_padlock_scale']|string %}
+      <div class="metric-card {% if r5 == 'H' %}metric-card--high{% endif %}">
+        <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
+        <div class="metric-card-title">% Independently Evaluated</div>
+        <div class="metric-card-value">{{ v5 }}%</div>
+        <div class="metric-card-badge">
+          <span class="risk-badge risk-{{ r5 }}">{{ r5 }}</span>
+          {% if r5 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
+        </div>
+        <div class="metric-card-desc">
+          Percentage of studies evaluated by an independent organisation rather than the intervention developers. Independent evaluation reduces the risk of developer bias inflating effect sizes.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Value</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr {% if v5 < 10 %}class="thresh-active"{% endif %}><td>&lt; 10%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+            <tr {% if 10 <= v5 < 30 %}class="thresh-active"{% endif %}><td>10 – 29%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v5 >= 30 %}class="thresh-active"{% endif %}><td>≥ 30%</td><td><span class="risk-badge risk-L">L</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card 6: Median % Attrition -->
+      {% set v6 = data['%_median_attrit_reported']|float %}
+      {% set r6 = data['%_median_attrit_reported_padlock_scale']|string %}
+      <div class="metric-card {% if r6 == 'H' %}metric-card--high{% endif %}">
+        <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
+        <div class="metric-card-title">Median % Attrition</div>
+        <div class="metric-card-value">{{ v6 }}%</div>
+        <div class="metric-card-badge">
+          <span class="risk-badge risk-{{ r6 }}">{{ r6 }}</span>
+          {% if r6 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
+        </div>
+        <div class="metric-card-desc">
+          Median percentage of participants who dropped out across studies. High attrition introduces bias if dropouts are systematically different from those who remained in the study.
+        </div>
+        <table class="threshold-table">
+          <thead><tr><th>Value</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr {% if v6 < 15 %}class="thresh-active"{% endif %}><td>&lt; 15%</td><td><span class="risk-badge risk-L">L</span></td></tr>
+            <tr {% if 15 <= v6 < 30 %}class="thresh-active"{% endif %}><td>15 – 29%</td><td><span class="risk-badge risk-M">M</span></td></tr>
+            <tr {% if v6 >= 30 %}class="thresh-active"{% endif %}><td>≥ 30%</td><td><span class="risk-badge risk-H">H</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /metric-row -->
+
+    <!-- Additional summary figures -->
+    <h2 style="font-size:1rem;color:#555;margin:2rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
+      Additional figures (not used in score)
+    </h2>
+    <div class="extra-stats">
+      <div class="extra-stat">
+        <div class="extra-stat-value">{{ data.total_pupil_number|int }}</div>
+        <div class="extra-stat-label">Total pupils across all studies</div>
+      </div>
+      <div class="extra-stat">
+        <div class="extra-stat-value">{{ data.mean_eco_valid_risk }}</div>
+        <div class="extra-stat-label">Mean eco. validity risk value</div>
+      </div>
+      <div class="extra-stat">
+        <div class="extra-stat-value">{{ data.median_school_number }}</div>
+        <div class="extra-stat-label">Median intervention schools</div>
+      </div>
+      <div class="extra-stat">
+        <div class="extra-stat-value">{{ data.median_class_number }}</div>
+        <div class="extra-stat-label">Median class number</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

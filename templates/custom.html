@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Column Selection – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container" style="max-width:920px">
+    <header>
+      <h1>Custom Column Selection</h1>
+      <p class="subtitle">Choose any combination of fields to include in your CSV download.</p>
+    </header>
+
+    <a href="{{ url_for('index') }}" class="back-link">← Back to standard extractions</a>
+
+    {% include '_file_bar.html' %}
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('custom_extract') }}" enctype="multipart/form-data" class="extract-form">
+
+      <div class="form-group">
+        <label>Select columns</label>
+        <div class="custom-actions" style="margin-bottom:.75rem">
+          <button type="button" id="btn-select-all-global" class="btn-extract" style="padding:.5rem 1.2rem;font-size:.88rem">Select all</button>
+          <button type="button" id="btn-clear-all-global" class="btn-clear-all">Clear all</button>
+          <span class="selected-count" id="selected-count">0 columns selected</span>
+        </div>
+
+        <div class="col-groups">
+          {% for group in groups %}
+            <div class="col-group">
+              <div class="col-group-header">
+                <strong>{{ group }}</strong>
+                <button type="button" class="btn-select-all" data-group="{{ group }}">Select all</button>
+              </div>
+              <div class="col-checkboxes" data-group="{{ group }}">
+                {% for col_name, label in column_groups[group] %}
+                  <label class="col-checkbox">
+                    <input type="checkbox" name="cols" value="{{ col_name }}" />
+                    {{ label }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="custom-actions">
+        <button type="submit" class="btn-extract"
+                {% if not session_file_name %}disabled title="Load a file above first"{% endif %}>
+          Extract &amp; Download CSV
+        </button>
+        <span class="selected-count" id="selected-count-bottom">0 columns selected</span>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="cols"]');
+
+    function updateCount() {
+      var n = document.querySelectorAll('input[type="checkbox"][name="cols"]:checked').length;
+      var txt = n + ' column' + (n === 1 ? '' : 's') + ' selected';
+      document.getElementById('selected-count').textContent = txt;
+      document.getElementById('selected-count-bottom').textContent = txt;
+    }
+
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', updateCount);
+    });
+
+    // Per-group select all
+    document.querySelectorAll('.btn-select-all[data-group]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var group = this.getAttribute('data-group');
+        document.querySelectorAll('.col-checkboxes[data-group="' + group + '"] input[type="checkbox"]')
+          .forEach(function(cb) { cb.checked = true; });
+        updateCount();
+      });
+    });
+
+    // Global select all
+    document.getElementById('btn-select-all-global').addEventListener('click', function() {
+      checkboxes.forEach(function(cb) { cb.checked = true; });
+      updateCount();
+    });
+
+    // Global clear all
+    document.getElementById('btn-clear-all-global').addEventListener('click', function() {
+      checkboxes.forEach(function(cb) { cb.checked = false; });
+      updateCount();
+    });
+  </script>
+</body>
+</html>

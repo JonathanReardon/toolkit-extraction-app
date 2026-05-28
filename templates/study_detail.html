@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study {{ study.id }} – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container" style="max-width:960px">
+
+    <!-- Study header -->
+    <div class="study-header-card">
+      <div class="study-header-id">#{{ study.id }}</div>
+      <div class="study-header-title">{{ study.author }}{% if study.year %} ({{ study.year }}){% endif %}</div>
+      {% if study.strand %}
+        <div class="study-header-strand">{{ study.strand }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Nav row -->
+    <div class="detail-nav">
+      <a href="{{ url_for('study_list', token=token) }}" class="back-link" style="margin:0">← Back to list</a>
+      <label class="toggle-empty">
+        <input type="checkbox" id="hide-empty" checked />
+        Hide empty fields
+      </label>
+    </div>
+
+    <!-- Section jump nav -->
+    <nav class="section-nav">
+      {% for sec in sections %}
+        {% if sec.filled > 0 %}
+          <a href="#sec-{{ loop.index }}" class="sec-nav-link">{{ sec.group }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <!-- Sections -->
+    {% for sec in sections %}
+    <div class="detail-section{% if sec.filled == 0 %} section-empty{% endif %}"
+         id="sec-{{ loop.index }}">
+      <button type="button" class="section-toggle" aria-expanded="true">
+        <span class="section-title">{{ sec.group }}</span>
+        <span class="section-badge">{{ sec.filled }} / {{ sec.fields|length }}</span>
+        <span class="section-arrow">▾</span>
+      </button>
+      <div class="section-body">
+        <dl class="field-list">
+          {% for field in sec.fields %}
+            {% set val = field.value | display_val %}
+            <div class="field-row{% if val is none %} field-empty{% endif %}">
+              <dt>{{ field.label }}</dt>
+              <dd>{% if val is not none %}{{ val }}{% else %}<span class="na-pill">—</span>{% endif %}</dd>
+            </div>
+          {% endfor %}
+        </dl>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <script>
+    // Toggle section open/close
+    document.querySelectorAll('.section-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var expanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !expanded);
+        var body = this.nextElementSibling;
+        body.style.display = expanded ? 'none' : 'block';
+        this.querySelector('.section-arrow').textContent = expanded ? '▸' : '▾';
+      });
+    });
+
+    // Hide empty fields toggle
+    document.getElementById('hide-empty').addEventListener('change', function() {
+      var hide = this.checked;
+      document.querySelectorAll('.field-empty').forEach(function(row) {
+        row.style.display = hide ? 'none' : '';
+      });
+      // also hide entire sections that have no filled fields
+      document.querySelectorAll('.detail-section.section-empty').forEach(function(sec) {
+        sec.style.display = hide ? 'none' : '';
+      });
+    });
+
+    // Apply initial state (hide empty on load)
+    document.getElementById('hide-empty').dispatchEvent(new Event('change'));
+  </script>
+</body>
+</html>

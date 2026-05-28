@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dashboard</h1>
+      <p class="subtitle">Visualise effect size distributions across all studies in your dataset.</p>
+    </header>
+
+    <a href="{{ url_for('index') }}" class="back-link">← Back to extractions</a>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash-messages" style="margin-top:1rem">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if session_token %}
+    <div class="session-use-box">
+      <div>
+        <strong>&#128196; {{ session_file_name }}</strong> is already loaded.
+      </div>
+      <div class="session-use-actions">
+        <a href="{{ url_for('dashboard_view', token=session_token) }}" class="btn-extract">Generate dashboard →</a>
+        <a href="{{ url_for('clear_file', next=request.path) }}" class="btn-clear-all">Change file</a>
+      </div>
+    </div>
+    <div class="or-divider">or upload a different file</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('dashboard_upload') }}"
+          enctype="multipart/form-data" class="extract-form" id="dash-form">
+      <div class="form-group">
+        <label for="file">JSON data file</label>
+        <input type="file" id="file" name="file" accept=".json" required />
+        <span class="hint">Export your study list from EPPI-Reviewer as a JSON file.</span>
+      </div>
+      <button type="submit" class="btn-extract" id="dash-submit">Generate Dashboard</button>
+    </form>
+
+    <div class="loading-overlay" id="loading" style="display:none">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Extracting effect sizes — this may take a moment…</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('dash-form').addEventListener('submit', function() {
+      document.getElementById('dash-submit').disabled = true;
+      document.getElementById('loading').style.display = 'flex';
+    });
+  </script>
+</body>
+</html>

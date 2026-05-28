@@ -1,0 +1,15 @@
+{% if session_file_name %}
+<div class="file-bar">
+  <span class="file-bar-icon">&#128196;</span>
+  <span class="file-bar-name">{{ session_file_name }}</span>
+  <a href="{{ url_for('clear_file', next=request.path) }}" class="file-bar-change">Change file ×</a>
+</div>
+{% else %}
+<form class="file-bar-upload" method="POST"
+      action="{{ url_for('load_file') }}" enctype="multipart/form-data">
+  <input type="hidden" name="next" value="{{ request.path }}" />
+  <label class="file-bar-upload-label">Load JSON file</label>
+  <input type="file" name="file" accept=".json" required class="file-bar-input" />
+  <button type="submit" class="file-bar-btn">Load &#8594;</button>
+</form>
+{% endif %}

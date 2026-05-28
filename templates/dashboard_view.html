@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container" style="max-width:960px">
+    <header>
+      <h1>Effect Size Dashboard</h1>
+      <p class="subtitle">Distribution of SMD values across all outcomes in the dataset.</p>
+    </header>
+
+    <a href="{{ url_for('dashboard') }}" class="back-link">← Upload a different file</a>
+
+    <!-- Stats strip -->
+    <div class="stat-strip">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.n_studies }}</div>
+        <div class="stat-label">Studies</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.n_outcomes }}</div>
+        <div class="stat-label">Outcomes with SMD</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.mean }}</div>
+        <div class="stat-label">Mean SMD</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.median }}</div>
+        <div class="stat-label">Median SMD</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.sd }}</div>
+        <div class="stat-label">SD</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.min }} – {{ stats.max }}</div>
+        <div class="stat-label">Range</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="chart-row">
+      <div class="chart-card chart-card--wide">
+        <h2 class="chart-title">SMD Distribution</h2>
+        <p class="chart-subtitle">Histogram of all effect size values (20 equal-width bins)</p>
+        <div class="chart-wrap">
+          <canvas id="histChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2 class="chart-title">Outcomes by Type</h2>
+        <p class="chart-subtitle">Number of outcomes with an SMD value per outcome category</p>
+        <div class="chart-wrap chart-wrap--doughnut">
+          <canvas id="typeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference lines note -->
+    <p class="chart-note">
+      Dashed lines mark SMD = 0 (no effect) and the EEF "security" thresholds at ±0.1 and ±0.2.
+    </p>
+  </div>
+
+  <script>
+    var ORANGE  = '#fc5424';
+    var DARK    = '#37474f';
+    var PALETTE = [
+      '#fc5424','#37474f','#f4a261','#2a9d8f','#e9c46a','#264653','#e76f51'
+    ];
+
+    // ── Histogram ──────────────────────────────────────────────────────────────
+    var hist = {{ histogram | safe }};
+
+    new Chart(document.getElementById('histChart'), {
+      type: 'bar',
+      data: {
+        labels: hist.labels,
+        datasets: [{
+          label: 'Outcomes',
+          data: hist.counts,
+          backgroundColor: ORANGE + 'cc',
+          borderColor: ORANGE,
+          borderWidth: 1,
+          borderRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: function(items) {
+                var i = items[0].dataIndex;
+                var labels = hist.labels;
+                var next = labels[i + 1] || '…';
+                return 'SMD ' + labels[i] + ' to ' + next;
+              },
+              label: function(item) {
+                return item.raw + ' outcome' + (item.raw === 1 ? '' : 's');
+              }
+            }
+          },
+          annotation: {}
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'SMD', color: '#666', font: { size: 12 } },
+            grid: { display: false },
+            ticks: { maxTicksLimit: 10, font: { size: 11 } }
+          },
+          y: {
+            title: { display: true, text: 'Count', color: '#666', font: { size: 12 } },
+            beginAtZero: true,
+            grid: { color: '#f0f0f0' },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      },
+      plugins: [{
+        // Draw reference lines manually
+        id: 'refLines',
+        afterDraw: function(chart) {
+          var ctx = chart.ctx;
+          var xAxis = chart.scales.x;
+          var yAxis = chart.scales.y;
+          var labels = hist.labels.map(Number);
+          var min = labels[0];
+          var max = labels[labels.length - 1] + (labels[1] - labels[0]);
+          var range = max - min;
+
+          function xPx(val) {
+            var pct = (val - min) / range;
+            return xAxis.left + pct * (xAxis.right - xAxis.left);
+          }
+
+          var lines = [
+            { val: 0,    color: DARK,   dash: [6,3], width: 2 },
+            { val: 0.1,  color: '#aaa', dash: [4,4], width: 1 },
+            { val: -0.1, color: '#aaa', dash: [4,4], width: 1 },
+            { val: 0.2,  color: '#ccc', dash: [4,4], width: 1 },
+            { val: -0.2, color: '#ccc', dash: [4,4], width: 1 },
+          ];
+
+          lines.forEach(function(l) {
+            if (l.val < min || l.val > max) return;
+            var x = xPx(l.val);
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash(l.dash);
+            ctx.strokeStyle = l.color;
+            ctx.lineWidth = l.width;
+            ctx.moveTo(x, yAxis.top);
+            ctx.lineTo(x, yAxis.bottom);
+            ctx.stroke();
+            ctx.restore();
+          });
+        }
+      }]
+    });
+
+    // ── Outcome type doughnut ──────────────────────────────────────────────────
+    var byType = {{ by_type_counts | safe }};
+
+    new Chart(document.getElementById('typeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: byType.labels,
+        datasets: [{
+          data: byType.counts,
+          backgroundColor: PALETTE.slice(0, byType.labels.length),
+          borderWidth: 2,
+          borderColor: '#fff',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { size: 11 }, padding: 12, boxWidth: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(item) {
+                var total = byType.counts.reduce(function(a,b){return a+b;},0);
+                var pct = Math.round(item.raw / total * 100);
+                return ' ' + item.raw + ' outcomes (' + pct + '%)';
+              }
+            }
+          }
+        },
+        cutout: '58%'
+      }
+    });
+  </script>
+</body>
+</html>
