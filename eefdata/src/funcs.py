@@ -12,24 +12,7 @@ import os
 import numpy as np
 import pandas as pd
 import warnings
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import PathCompleter
-from rich.console import Console
-from rich.progress import track
-from rich.style import Style
-from rich.table import Table
-from rich.columns import Columns
-from rich.panel import Panel
-from rich import box
-from rich import print
 from toolz import interleave
-
-from rich.console import Console
-from rich.panel import Panel
-from rich.layout import Layout
-from rich.style import Style
-from rich.table import Table
-from rich.columns import Columns
 
 # Local imports
 from .attributeIDs import *
@@ -3903,102 +3886,70 @@ class StrandSpecificFrames:
         match user_input:
             # MAIN TOOLKIT
             case 1: 
-                print("- Strand specific datraframe selection: Arts Participation")
                 ss_df = self.arts_participation_ss()
             case 2: 
-                print("- Strand specific datraframe selection: Behaviour Interventions")
                 ss_df = self.behaviour_int_ss()
             case 3:
-                print("- Strand specific datraframe selection: Collaborative Learning")
                 ss_df = self.collab_learning_ss()
             case 4: 
-                print("- Strand specific datraframe selection: Extending School Time")
                 ss_df = self.ext_school_time_ss()
             case 5: 
-                print("- Strand specific datraframe selection: Feedback")
                 ss_df = self.feedback_ss()
             case 6:
-                print("- Strand specific datraframe selection: Homework")
                 ss_df = self.homework_ss()
             case 7: 
-                print("- Strand specific datraframe selection: Individualised Instruction")
                 ss_df = self.indiv_instr_ss()
             case 8: 
-                print("- Strand specific datraframe selection: Mentoring")
                 ss_df = self.mentoring_ss()
             case 9:
-                print("- Strand specific datraframe selection: Mastery Learning")
                 ss_df = self.mastery_learning_ss()
             case 10: 
-                print("- Strand specific datraframe selection: Metacognition & Self Regulation")
                 ss_df = self.metacog_self_reg_ss()
             case 11:
-                print("- Strand specific datraframe selection: One to One Tuition")
                 ss_df = self.one_t_one_comp_ss()
             case 12: 
-                print("- Strand specific datraframe selection: Oral Language")
                 ss_df = self.oral_lang_ss()
             case 13:
-                print("- Strand specific datraframe selection: Physical Activity")
                 ss_df = self.phys_activity_ss()
             case 14: 
-                print("- Strand specific datraframe selection: Parentel Engagement")
                 ss_df = self.parental_engagement()
             case 15: 
-                print("- Strand specific datraframe selection: Phonics")
                 ss_df = self.phonics()
             case 16:
-                print("- Strand specific datraframe selection: Performance Pay")
                 ss_df = self.performance_pay()
             case 17: 
-                print("- Strand specific datraframe selection: Peer Tutoring")
                 ss_df = self.peer_tut()
             case 18: 
-                print("- Strand specific datraframe selection: Reading Comprehension")
                 ss_df = self.read_comprehension_ss()
             case 19:
-                print("- Strand specific datraframe selection: Reducing Class Size")
                 ss_df = self.red_class_size_ss()
             case 20: 
-                print("- Strand specific datraframe selection: Repeating a Year")
                 ss_df = self.repeat_year_ss()
             case 21: 
-                print("- Strand specific datraframe selection: Social & Emotional Learning")
                 ss_df = self.soc_emo_learning_ss()
             case 22: 
-                print("- Strand specific datraframe selection: Setting/Streaming")
                 ss_df = self.setting_streaming_ss()
             case 23: 
-                print("- Strand specific datraframe selection: Small Group Tuition")
                 ss_df = self.small_group_tuit_ss()
             case 24: 
-                print("- Strand specific datraframe selection: Summer Schools")
                 ss_df = self.summer_school_ss()
             case 25: 
-                print("- Strand specific datraframe selection: Teaching Assistants")
                 ss_df = self.teach_assistants_ss()
             case 26: 
-                print("- Strand specific datraframe selection: Within-Class Grouping")
                 ss_df = self.within_class_grouping()
             # EARLY YEARS TOOKLIT (overlap)
             case 27: 
-                print("- Strand specific datraframe selection: Early Years - Early Literacy Approaches")
                 ss_df = self.ey_early_lit_approaches_ss()
             case 28: 
-                print("- Strand specific datraframe selection: Early Numeracy Approaches")
                 ss_df = self.ey_early_num_approaches_ss()
             case 29: 
-                print("- Strand specific datraframe selection: Earlier Starting Age")
                 ss_df = self.ey_earlier_start_age_ss()
             case 30: 
-                print("- Strand specific datraframe selection: Extra Hours")
                 ss_df = self.ey_extra_hours_ss()
             case 31: 
-                print("- Strand specific datraframe selection: Play Based Learning")
                 ss_df = self.ey_play_based_learning_ss()
             # CEDIL
             case 32:
-                print("- Strand specific datraframe selection: [CEDIL] Cash Transfer]")
                 ss_df = self.cash_transfer_CEDIL_ss()
         return ss_df
 
@@ -4642,7 +4593,7 @@ class RiskofBias:
 
     def padlocks(self, save_file=True):
 
-        # % studies since year 2010 
+        # % studies since year 2000 
         """ number_of_studies = len(self.risk_of_bias_df)
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
         recent_studies = len(self.risk_of_bias_df[self.risk_of_bias_df["pub_year"] > 2000])
@@ -4650,7 +4601,7 @@ class RiskofBias:
         perc_recent = np.round(perc_recent, 2) """
 
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
-        perc_recent = (self.risk_of_bias_df["pub_year"] > 2010).mean() * 100
+        perc_recent = (self.risk_of_bias_df["pub_year"] > 2000).mean() * 100
         perc_recent = round(perc_recent, 2)
 
         #print(f"perc_recent: {perc_recent}")
@@ -5217,535 +5168,4 @@ def sample_main_check(json_extractor):
         loc_type_HT_df,
     ], axis=1, sort=False)
     return loc_info """
-
-#/*************************/
-#/   COMMAND LINE TABLES   /
-#/*************************/
-
-def data_analysis_cl_table():
-    """
-    """
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    main_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    main_table.add_column("", style="bold white")
-    main_table.add_column("[bold #fc5424]Main Toolkit[/bold #fc5424]", header_style="bold", style=WHITE)
-
-    main_table.add_row("1",  "Arts Participation")
-    main_table.add_row("2",  "Behaviour Interventions")
-    main_table.add_row("3",  "Collaborative Learning")
-    main_table.add_row("4",  "Extending School Time")
-    main_table.add_row("5",  "Feedback")
-    main_table.add_row("6",  "Homework")
-    main_table.add_row("7",  "Individualised Instruction")
-    main_table.add_row("8",  "Mentoring")
-    main_table.add_row("9",  "Mastery Learning")
-    main_table.add_row("10",  "Metacognition & Self Regulation")
-    main_table.add_row("11",  "One to One Tution")
-    main_table.add_row("12",  "Oral Language")
-    main_table.add_row("13",  "Physical Activity")
-    main_table.add_row("14",  "Parentel Engagement")
-    main_table.add_row("15",  "Phonics")
-    main_table.add_row("16",  "Performance Pay")
-    main_table.add_row("17",  "Peer Tutoring")
-    main_table.add_row("18",  "Reading Comprehension")
-    main_table.add_row("19",  "Reducing Class Size")
-    main_table.add_row("20",  "Repeating a Year")
-    main_table.add_row("21",  "Social & Emotional Learning")
-    main_table.add_row("22",  "Setting/Streaming")
-    main_table.add_row("23",  "Small Group Tuition")
-    main_table.add_row("24",  "Summer Schools")
-    main_table.add_row("25",  "Teaching Assistants")
-    main_table.add_row("26",  "Within-Class Grouping")
-
-    main_table.add_row("",    "")
-    main_table.add_row("",    "[bold #fc5424]Early Years Toolkit[/bold #fc5424]")
-    main_table.add_row("",    "")
-    main_table.add_row("27",  "Early Literacy Approaches")
-    main_table.add_row("28",  "Early Numeracy Approaches")
-    main_table.add_row("29",  "Earlier Starting Age")
-    main_table.add_row("30",  "Extra Hours")
-    main_table.add_row("31",  "Play-Based Learning")
-
-
-    # Create a new Panel object
-    panel = Panel(main_table, 
-                  title="Strand Specific Selection", 
-                  style=custom_style_df1,
-                  border_style="bold white",
-                  title_align="left",
-                  padding=(1, 2),
-                  width=80)
-
-    console = Console()
-    print("\n")
-    console.print(panel)
-    print("\n")
-
-     # Get user selection for strand specific dataframe (if needed)
-    ss_user_input = int(input("Select strand specific option: "))
-    return ss_user_input
-
-
-def display_table_struct(funcs): 
-    """
-    """
-    for num, func in track(enumerate(funcs), description="[green]Processing dataframes..\n[/green]"):
-        func(save_file=True, clean_cols=True, verbose=False)
-
-
-
-def data_cleaning_col_breakdown():
-
-    table_title_style = Style(italic=False, bgcolor=GREY, color=WHITE, bold=True)
-    header_style = Style(italic=False, bgcolor=GREY, color=WHITE, bold=True)
-    column_style = Style(bgcolor=GREY, color=WHITE) 
-
-    main_table2 = Table(show_header=True, 
-                        box=box.MINIMAL,
-                        highlight=False,
-                        title_style=table_title_style,
-                        title=None,                   
-    )
-    main_table2.add_column("Dataframe 1", header_style=header_style, style=column_style)
-    main_table2.add_column("Dataframe 2", header_style=header_style, style=column_style)
-    main_table2.add_column("Dataframe 3", header_style=header_style, style=column_style)
-    main_table2.add_column("Dataframe 4", header_style=header_style, style=column_style)
-    main_table2.add_column("Dataframe 5", header_style=header_style, style=column_style)
-    main_table2.add_row("Study ID",  "Study ID",  "Study ID",  "Study ID",  "Study ID")
-    main_table2.add_row("Author",  "Author",  "Author",  "Author",  "Author")
-    main_table2.add_row("Year",  "Year",  "Year",  "Year",  "Year")
-    main_table2.add_row("Abstract",  "Strand",  "Strand",  "Strand",  "Strand")
-    main_table2.add_row("Admin Strand",  "Int Name",  "Gender",  "Desc Stats Prim Out",  "Outcome Type")
-    main_table2.add_row("Publication Type EPPI",  "Int Description",  "Sample Size",  "Int Treat Grp Number",  "Standard Mean Difference")
-    main_table2.add_row("Publication Type",  "Int Objective",  "SES/FSM",  "Int Treat Grp Pre-test Mean/SD",  "Standard Error")
-    main_table2.add_row("Educational Setting", "Int Organisation Type",  "Int Treat Sample Size",  "Int Treat Grp Post-test Mean/SD",  "Confidence Interval (lb)")
-    main_table2.add_row("Ecological Validity", "Int Training",  "Int Cont Sample Size",  "Int Treat Grp Gain Score Mean/SD",  "Confidence Interval (ub)")
-    main_table2.add_row("Student Age",  "Int Focus",  "Int Treat Grp2 Sample Size",  "Int Treat Grp Any Other Info",  "Outcome")
-    main_table2.add_row("Number of Schools",  "Int Teaching Approach",  "Int Treat Grp3 Sample Size",  "Int Cont Grp Number",  "Sample")
-    main_table2.add_row("Number of Classes",  "Int Inclusion",  "Int Treat Sample Size Analyzed",  "Int Cont Grp Pre-test Mean/SD",  "Outcome Comparison")
-    main_table2.add_row("Treatment Group",  "Int Time",  "Int Cont Sample Size Analyzed",  "Int Cont Grp Post-test Mean/SD",  "Effect Size Type")
-    main_table2.add_row("Participant Assignment",  "Int Delivery",  "Int Treat Grp2 Sample Size Analyzed",  "Int Cont Grp Gain Score Mean/SD",  "Outcome Measure")
-    main_table2.add_row("Level of Assignment", "Int Duration",  "Int Cont Grp2 Sample Size Analyzed",  "Int Cont Grp Any Other Info",  "Outcome Title")
-    main_table2.add_row("Study Design", "Int Frequency",  "Attrition Reported",  "Int Treat Grp2 Number",  "Group1 N")
-    main_table2.add_row( "Randomisation",  "Int Session Length",  "Attrition Treat Grp",  "Int Treat Grp2 Pre-test Mean/SD",  "Group2 N")
-    main_table2.add_row("Other Outcomes",  "Int Detail",  "Attrition Total (%)",  "Int Treat Grp2 Post-test Mean/SD",  "Group1 Mean")
-    main_table2.add_row("Additional Outcomes",  "Int Costs", "", "Int Treat Grp2 Gain Score Mean/SD", "Group2 Mean")
-    main_table2.add_row("Other Participants Outcomes", "Int Evaluation",  "",   "Int Treat Grp2 Any Other Info", "Group1 SD")
-    main_table2.add_row("",  "Baseline Differences", "",  "Int Cont Grp2 Number",  "Group2 SD")
-    main_table2.add_row("", "Computational Analysis",  "", "Int Cont Grp2 Pre-test Mean/SD",  "Outcome Description")
-    main_table2.add_row("",  "Comparability Variables Reported",  "", "Int Cont Grp2 Post-test Mean/SD",  "Test Type Outcome")
-    main_table2.add_row("",  "Clustering",  "", "Int Cont Grp2 Gain Score Mean/SD", "")
-    main_table2.add_row("",  "", "",  "Int Cont Grp2 Any Other Info", "")
-    main_table2.add_row("",  "", "",  "Follow-up Information", "")
-    main_table2.footer = "This is the footer."
-    return main_table2
-
-
-def display_main_menu():
-    table_title_style = Style(italic=False, bgcolor=None, color="#fc5424", bold=True)
-    header_style = Style(italic=False, bgcolor="#fc5424", color=WHITE, bold=True)
-    column_style = Style(bgcolor=GREY, color=WHITE, bold=False) 
-
-    main_table = Table(show_header=True,
-                       highlight=False,
-                       title=None,
-                       title_style=table_title_style,
-                       box=box.SIMPLE)
-
-    selection_style = Style(italic=False, bgcolor=GREY, color="#fc5424", bold=True)
-    description_style = Style(italic=False, bgcolor=GREY, color="#fc5424", bold=True)
-
-    main_table.add_column("Selection", header_style=selection_style, style=column_style)
-    main_table.add_column("Description", header_style=description_style, style=column_style)
-
-    main_table.add_row(" 1. Dataframe 1",      "Study, Research & Design Variables")
-    main_table.add_row(" 2. Dataframe 2",      "Intervention Details")
-    main_table.add_row(" 3. Sample Size",      "Sample size variables")
-    main_table.add_row(" 4. Effect Size A",    "Descriptive Statistics")
-    main_table.add_row(" 5. Effect Size B",    "Outcome Details")
-    main_table.add_row(" 6. Data Analysis",    "Key variables for data analysis")
-    main_table.add_row(" 7. Outcome Data",     "Raw outcome data")
-    main_table.add_row(" 8. Study Security",     "Study Security calculations")
-    main_table.add_row(" 9. Padlocks",       "Strand level padlock data")
-    main_table.add_row("10. References",     "Data for constructing study references")
-    main_table.add_row("11. Column Selection", "Custom column selection")
-    main_table.add_row("12. Study Selection", "Custom ID selection")
-
-    main_table.add_row("", "")
-
-    main_table.add_row(" 0. EXIT", "")
-    return main_table
-
-
-def dataframe_1_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df1_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df1_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df1_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df1_table.add_row("Dataframe 1", outfile, style=WHITE)
-
-    return df1_table
-
-
-def dataframe_2_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df2_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df2_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df2_table.add_column("Output directory", justify="left", header_style=WHITE)
-    df2_table.add_row("Dataframe 2", outfile, style=WHITE)
-
-    return df2_table
-
-
-def dataframe_3_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df3_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df3_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df3_table.add_column("Output directory", justify="left", header_style=WHITE)
-    df3_table.add_row("Sample Size", outfile, style=WHITE)
-
-    return df3_table
-
-
-def dataframe_4_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df4_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df4_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df4_table.add_column("Output directory", justify="left", header_style=WHITE)
-    df4_table.add_row("Effect Size A", outfile, style=WHITE)
-
-    return df4_table
-
-
-def dataframe_5_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df5_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df5_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df5_table.add_column("Output directory", justify="left", header_style=WHITE)
-    df5_table.add_row("Effect Size B", outfile, style=WHITE)
-
-    return df5_table
-
-
-def dataframe_6_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df6_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df6_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df6_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df6_table.add_row("Main Analysis", outfile, style=WHITE)
-
-    return df6_table
-
-
-def dataframe_7_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df7_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df7_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df7_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df7_table.add_row("Outcome Data", outfile, style=WHITE)
-
-    return df7_table
-
-def dataframe_8_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df8_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df8_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df8_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df8_table.add_row("Study Security", outfile, style=WHITE)
-
-    return df8_table
-
-def dataframe_9_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df9_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df9_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df9_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df9_table.add_row("Padlocks", outfile, style=WHITE)
-
-    return df9_table
-
-def dataframe_10_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df10_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df10_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df10_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df10_table.add_row("References", outfile, style=WHITE)
-
-    return df10_table
-
-def dataframe_11_output_display(functions, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df11_table = Table(show_header=True, 
-                      style=custom_style_df1,
-                      title=None,
-                      safe_box=False,
-                      box=box.SIMPLE)
-
-    df11_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df11_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df11_table.add_row("Custom", outfile, style=WHITE)
-
-    return df11_table
-
-def create_output_display_table(dataframe_name, outfile):
-    console = Console()
-    custom_style_df1 = Style(bgcolor=GREY)
-
-    df_table = Table(show_header=True,
-                     style=custom_style_df1,
-                     title=None,
-                     safe_box=False,
-                     box=box.SIMPLE)
-
-    df_table.add_column("Selection", justify="center", header_style="#fc5424")
-    df_table.add_column("Output directory", justify="left", header_style="#fc5424")
-    df_table.add_row(dataframe_name, outfile, style=WHITE)
-
-    return df_table
-
-
-def input_file_info_display(data_file):
-
-    table_title_style = Style(italic=False, bgcolor=GREY, color=WHITE, bold=True)
-    header_style = Style(italic=False, bgcolor=GREY, color="#fc5424", bold=True)
-    column_style = Style(bgcolor=GREY, color=WHITE) 
-
-    file_info_table = Table(show_header=True,
-                       highlight=False,
-                       title=None,
-                       title_style=table_title_style,
-                       box=box.SIMPLE)
-    
-    file_info_table.add_column("Your input file", header_style=header_style, style=column_style)
-    file_info_table.add_row(data_file)
-    return file_info_table
-
-def main_menu_display():
-    console = Console()
-    #data_cleaning_var_table = data_cleaning_col_breakdown()
-    main_menu_table = display_main_menu()
-    datafile_info_table = input_file_info_display(data_file)
-
-    custom_style_main = Style(bgcolor=GREY)
-    custom_style_file_details = Style(bgcolor=GREY)
-    custom_style_cleaning_info = Style(bgcolor=GREY)
-
-    container_title = console.render_str("[bold white]EEF Data Extractor[/bold white]")
-
-    top_title = console.render_str("[bold white]Welcome[/bold white]")
-    title1 = console.render_str("[bold white]Main Menu[/bold white]")
-    title2 = console.render_str("[bold white]Data File Details[/bold white]")
-
-    # Set text for top panel of main menu
-    top_panel_text = (
-        "[#FFFFFF]Welcome to the EEF Data Extractor. Use the[/#FFFFFF] "
-        "[bold #fc5424]Main Menu[/bold #fc5424] [#FFFFFF]to generate various dataframes containing data extracted "
-        "from an input [bold #fc5424]JSON[/bold #fc5424] [#FFFFFF]datafile produced by the EEF Education Evidence "
-        "Database.\n\n[bold #fc5424]Options 1-5[/bold #fc5424] [#FFFFFF]include our own custom dataframes "
-        "for data cleaning prior to analysis.[/#FFFFFF] [bold #fc5424]Option 6[/bold #fc5424] [#FFFFFF]generates the "
-        "final dataframe(s) used in our meta-analyses. [bold #fc5424]Option 7[/bold #fc5424] produces raw (unordered) "
-        "outcome data. [bold #fc5424]Option 8[/bold #fc5424] produces a bespoke study security dataframe. "
-        "[/#FFFFFF][bold #fc5424]Option 9[/bold #fc5424] produces a strand-level 'padlocks' dataframe. [bold #fc5424]Option 10[/bold #fc5424] [#FFFFFF]compiles "
-        "the necessary data for constructing study references. Finally, [/#FFFFFF][bold #fc5424]Option 11[/bold #fc5424] "
-        "[#FFFFFF]allows you to create your own custom column dataframe,[/#FFFFFF] and [bold #fc5424]option 12[/bold #fc5424] allows you to create your own "
-        "individual study dataframe."
-    )
-    top_menu_style = Style(bgcolor=GREY)
-
-    # create the panel with the text
-    top_panel = Panel(
-        top_panel_text,
-        title=top_title, 
-        border_style="bold white",
-        title_align="left",
-        style=top_menu_style,
-        padding=(1, 2),
-        width=120,
-    )
-
-    panel1 = Panel.fit(
-        main_menu_table,
-        title=title1,
-        border_style="bold white",
-        style=custom_style_main,
-        title_align="left",
-        padding=(1, 2),
-        width=120,
-    )
-
-    panel2 = Panel.fit(
-        datafile_info_table,
-        title=title2,
-        border_style="bold white",
-        style=custom_style_file_details,
-        title_align="left",
-        padding=(1, 2),
-        width=120,
-    )
-
-    # combine the text panel and panels into a new column
-    column_combined = Columns([top_panel, panel1, panel2], equal=False)
-
-    # create the layout with the combined column
-    layout = Layout(column_combined)
-
-    panel = Panel(
-        layout,
-        title=container_title,
-        border_style="bold white",
-        padding=(1, 2),
-        title_align="center",
-        style=custom_style_main,
-        height=47,
-        width=120,
-    )
-
-    console.clear()
-    console.print(panel)
-    print("\n")
-
-
-def main_menu_display1(functions, outfile1, df_display):
-
-    console = Console()
-    output_file_info = df_display(functions, outfile1)
-    main_menu_table = display_main_menu()
-    datafile_info_table = input_file_info_display(data_file)
-
-    custom_style_main = Style(bgcolor=GREY)
-    custom_style_file_details = Style(bgcolor=GREY)
-    custom_style_cleaning_info = Style(bgcolor=GREY)
-
-    title1 = console.render_str("[bold white]Main Menu[/bold white]")
-    title2 = console.render_str("[bold white]Data File Details[/bold white]")
-    title3 = console.render_str("[bold white]Output Files[/bold white]")
-
-    panel1a = Panel.fit(
-        main_menu_table,
-        title=title1,
-        border_style="bold white",
-        style=custom_style_main,
-        title_align="left",
-        padding=(1, 2),
-    )
-    panel1b = Panel.fit(
-        datafile_info_table,
-        title=title2,
-        border_style="bold white",
-        style=custom_style_file_details,
-        title_align="left",
-        padding=(1, 2),
-    )
-
-    panel2 = Panel.fit(
-        output_file_info,
-        title=title3,
-        border_style="bold white",
-        style=custom_style_cleaning_info,
-        title_align="left",
-        padding=(1, 2),
-    )
-    # create the first row of columns
-    row1 = Columns([panel1a], equal=False)
-
-    row1b = Columns([panel1b], equal=False)
-
-    # create the second row of columns
-    row2 = Columns([panel2], equal=False)
-
-    # create the layout with the panels
-    layout = Columns([row1, row1b, row2], equal=False)
-
-    panel = Panel(
-        layout, 
-        title="EEF Teaching and Learning Toolkit Data Extractor", 
-        border_style="bold white", 
-        padding=(1, 2), 
-        title_align="left",
-        style=custom_style_main,
-        width=120,
-        height=44)
-
-    console.clear()
-    console.print(panel)
-    print("\n")
 
