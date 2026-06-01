@@ -7,25 +7,26 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-<body>
-  <div class="container" style="max-width:1200px">
+<body class="page-body">
 
-    {% include '_file_bar.html' %}
+  {% include '_nav.html' %}
 
-    <!-- Top bar -->
-    <div class="padlock-topbar">
+  <!-- Page header -->
+  <div class="page-header-bar">
+    <div class="page-header-bar-inner">
       <div>
-        <a href="{{ url_for('index') }}" class="back-link" style="margin:0 0 .4rem">← Back to extractions</a>
-        <h1 style="margin:.3rem 0 .2rem">Study Security</h1>
-        <p style="color:#666;font-size:.9rem;margin:0">
-          Risk-of-bias assessment across {{ n_studies }} studies &middot; {{ criteria|length }} criteria
-        </p>
+        <a href="{{ url_for('index') }}" class="back-link">← Back to extractions</a>
+        <h1>Study Security</h1>
+        <p>Risk-of-bias assessment across {{ n_studies }} studies &middot; {{ criteria|length }} criteria</p>
       </div>
       <a href="{{ url_for('study_security_download') }}" class="btn-extract"
          style="padding:.6rem 1.4rem;font-size:.9rem;text-decoration:none">
         ↓ Download CSV
       </a>
     </div>
+  </div>
+
+  <div class="page-wrap">
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -172,7 +173,7 @@
       </div>
     </div>
 
-  </div>
+  </div><!-- /.page-wrap -->
 
   <script>
     new ApexCharts(document.getElementById('chart-dist'), {

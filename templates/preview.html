@@ -6,17 +6,18 @@
   <title>{{ option_label }} – EEF Toolkit Extractor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
-<body>
-  <div class="container" style="max-width:1300px">
+<body class="page-body">
 
-    {% include '_file_bar.html' %}
+  {% include '_nav.html' %}
 
-    <div class="preview-header">
+  <!-- Page header -->
+  <div class="page-header-bar">
+    <div class="page-header-bar-inner">
       <div>
         <a href="{{ url_for('index') }}" class="back-link">← Back to extractions</a>
-        <h1 style="margin:.3rem 0 .2rem">{{ option_label }}</h1>
+        <h1>{{ option_label }}</h1>
         {% if row_count %}
-        <p style="color:#666;font-size:.9rem;margin:0">{{ row_count }} rows &middot; {{ col_count }} columns</p>
+        <p>{{ row_count }} rows &middot; {{ col_count }} columns</p>
         {% endif %}
       </div>
       {% if records %}
@@ -30,6 +31,9 @@
       </form>
       {% endif %}
     </div>
+  </div>
+
+  <div class="page-wrap">
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -107,6 +111,7 @@
     <p style="color:#999;margin-top:2rem">No data returned for this extraction.</p>
     {% endif %}
 
-  </div>
+  </div><!-- /.page-wrap -->
+
 </body>
 </html>

@@ -6,14 +6,25 @@
   <title>EEF Toolkit Data Extractor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
-<body>
-  <div class="container">
-    <header>
-      <h1>EEF Toolkit Data Extractor</h1>
-      <p class="subtitle">Upload an EPPI-Reviewer JSON export and download the extracted dataset as CSV.</p>
-    </header>
+<body class="index-body">
 
-    {% include '_file_bar.html' %}
+  {% include '_nav.html' %}
+
+  <!-- Hero banner -->
+  <div class="index-hero">
+    <div class="index-hero-inner">
+      <h1 class="index-hero-title">EEF Toolkit Data Extractor</h1>
+      <p class="index-hero-sub">Load an EPPI-Reviewer JSON export, select an extraction type, and download a structured dataset.</p>
+    </div>
+  </div>
+
+  <div class="index-wrap">
+
+    <!-- File load -->
+    <div class="index-file-section">
+      <div class="index-section-label">Data file</div>
+      {% include '_file_bar.html' %}
+    </div>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -25,38 +36,40 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('extract') }}" enctype="multipart/form-data" class="extract-form">
+    <!-- Extraction form -->
+    <form method="POST" action="{{ url_for('extract') }}" enctype="multipart/form-data">
 
-      <div class="form-group">
-        <label>Extraction type</label>
-        <div class="option-grid">
-          {% set has_preview = ['1', '2', '3', '4', '5', '7'] %}
-          {% for key, opt in options.items() %}
-            {% set locked = not session_file_name %}
-            <label class="option-card {% if locked %}option-card--locked{% endif %}">
-              <input type="radio" name="option" value="{{ key }}"
-                     {% if loop.first %}checked{% endif %}
-                     {% if locked %}disabled{% endif %} />
-              <span class="option-label">{{ opt.label }}</span>
-              {% if session_file_name %}
-                {% if key in has_preview %}
-                  <a href="{{ url_for('preview', option=key) }}" class="option-view-link"
-                     onclick="event.stopPropagation()">View →</a>
-                {% elif key == '8' %}
-                  <a href="{{ url_for('study_security_detail') }}" class="option-view-link"
-                     onclick="event.stopPropagation()">View →</a>
-                {% elif key == '9' %}
-                  <a href="{{ url_for('padlocks_detail') }}" class="option-view-link"
-                     onclick="event.stopPropagation()">View →</a>
-                {% endif %}
+      <div class="index-section-label" style="margin-top:1.5rem">Extraction type</div>
+
+      {% set has_preview = ['1', '2', '3', '4', '5', '7'] %}
+      <div class="option-list">
+        {% for key, opt in options.items() %}
+          {% set locked = not session_file_name %}
+          {% set label = opt.label.split('. ', 1)[1] if '. ' in opt.label else opt.label %}
+          <label class="option-row {% if locked %}option-row--locked{% endif %}">
+            <input type="radio" name="option" value="{{ key }}"
+                   {% if loop.first %}checked{% endif %}
+                   {% if locked %}disabled{% endif %} />
+            <div class="option-row-num">{{ key }}</div>
+            <div class="option-row-label">{{ label }}</div>
+            {% if session_file_name %}
+              {% if key in has_preview %}
+                <a href="{{ url_for('preview', option=key) }}" class="option-view-link"
+                   onclick="event.stopPropagation()">View →</a>
+              {% elif key == '8' %}
+                <a href="{{ url_for('study_security_detail') }}" class="option-view-link"
+                   onclick="event.stopPropagation()">View →</a>
+              {% elif key == '9' %}
+                <a href="{{ url_for('padlocks_detail') }}" class="option-view-link"
+                   onclick="event.stopPropagation()">View →</a>
               {% endif %}
-            </label>
-          {% endfor %}
-        </div>
+            {% endif %}
+          </label>
+        {% endfor %}
       </div>
 
-      <div class="form-group" id="strand-group" style="display:none">
-        <label for="strand">Strand</label>
+      <div id="strand-group" style="display:none;margin-top:1.25rem;flex-direction:column;gap:.4rem">
+        <div class="index-section-label">Strand</div>
         <select id="strand" name="strand" class="strand-select">
           <optgroup label="Main Toolkit">
             {% for key, name in strands.items() %}
@@ -75,36 +88,40 @@
         </select>
       </div>
 
-      <button type="submit" class="btn-extract"
-              {% if not session_file_name %}disabled title="Load a file above first"{% endif %}>
-        Extract &amp; Download CSV
-      </button>
+      <div class="index-actions">
+        <button type="submit" class="btn-extract"
+                {% if not session_file_name %}disabled title="Load a file above first"{% endif %}>
+          Extract &amp; Download CSV
+        </button>
+        <div class="index-doc-links">
+          <a href="{{ url_for('guide') }}" class="btn-docs">User Guide →</a>
+          <a href="{{ url_for('docs') }}" class="btn-docs">Technical Docs →</a>
+        </div>
+      </div>
+
     </form>
 
-    <div class="docs-btn-wrap">
-      <a href="{{ url_for('guide') }}" class="btn-docs">User Guide →</a>
-      <a href="{{ url_for('docs') }}" class="btn-docs">Technical Documentation →</a>
-    </div>
+  </div><!-- /.index-wrap -->
 
-    <script>
-      document.querySelectorAll('input[name="option"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-          document.getElementById('strand-group').style.display =
-            this.value === '6' ? 'flex' : 'none';
-        });
+  <script>
+    document.querySelectorAll('input[name="option"]').forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        var sg = document.getElementById('strand-group');
+        sg.style.display = this.value === '6' ? 'flex' : 'none';
       });
-    </script>
+    });
+  </script>
 
-    {% if console_padlocks %}
-    <script>
-      (function() {
-        var data = {{ console_padlocks | tojson }};
-        console.groupCollapsed('%c PADLOCK SCORES ', 'background:#fc5424;color:#fff;font-weight:bold;border-radius:3px');
-        console.table(data);
-        console.groupEnd();
-      })();
-    </script>
-    {% endif %}
-  </div>
+  {% if console_padlocks %}
+  <script>
+    (function() {
+      var data = {{ console_padlocks | tojson }};
+      console.groupCollapsed('%c PADLOCK SCORES ', 'background:#fc5424;color:#fff;font-weight:bold;border-radius:3px');
+      console.table(data);
+      console.groupEnd();
+    })();
+  </script>
+  {% endif %}
+
 </body>
 </html>

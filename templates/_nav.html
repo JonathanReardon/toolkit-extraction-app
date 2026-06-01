@@ -1,0 +1,14 @@
+<nav class="app-nav">
+  <div class="app-nav-inner">
+    <div class="app-nav-brand">
+      <span class="app-nav-mark"></span>
+      <span class="app-nav-title">EEF Toolkit Extractor</span>
+      <span class="app-nav-version">v2.0</span>
+    </div>
+    <div class="app-nav-links">
+      <a href="{{ url_for('index') }}" class="app-nav-link {% if request.endpoint == 'index' %}app-nav-link--active{% endif %}">Extractor</a>
+      <a href="{{ url_for('guide') }}" class="app-nav-link {% if request.endpoint == 'guide' %}app-nav-link--active{% endif %}">User Guide</a>
+      <a href="{{ url_for('docs') }}" class="app-nav-link {% if request.endpoint == 'docs' %}app-nav-link--active{% endif %}">Technical Docs</a>
+    </div>
+  </div>
+</nav>
