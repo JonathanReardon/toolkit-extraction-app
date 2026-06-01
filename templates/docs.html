@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page_title }} – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body class="docs-body">
+
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <nav class="docs-sidebar">
+      <div class="docs-sidebar-inner">
+        <a href="{{ url_for('index') }}" class="docs-home-link">← Back to app</a>
+        <p class="docs-nav-title">Contents</p>
+        <ul class="docs-nav">
+          {% for h in headings %}
+            <li class="docs-nav-item docs-nav-h{{ h.level }}">
+              <a href="#{{ h.anchor }}">{{ h.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="docs-main">
+      <div class="docs-content">
+        {{ content | safe }}
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Syntax highlight all code blocks
+    document.querySelectorAll('pre code').forEach(function(el) {
+      hljs.highlightElement(el);
+    });
+
+    // Inject id anchors onto headings so sidebar links work
+    document.querySelectorAll('.docs-content h1, .docs-content h2, .docs-content h3').forEach(function(el) {
+      var anchor = el.textContent.trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+      el.id = anchor;
+    });
+
+    // Highlight active sidebar link on scroll
+    var navLinks = document.querySelectorAll('.docs-nav a');
+    var headings = document.querySelectorAll('.docs-content h1, .docs-content h2, .docs-content h3');
+    window.addEventListener('scroll', function() {
+      var scrollY = window.scrollY + 100;
+      var current = '';
+      headings.forEach(function(h) {
+        if (h.offsetTop <= scrollY) current = h.id;
+      });
+      navLinks.forEach(function(a) {
+        a.classList.toggle('docs-nav-active', a.getAttribute('href') === '#' + current);
+      });
+    }, { passive: true });
+  </script>
+</body>
+</html>

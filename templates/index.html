@@ -30,13 +30,22 @@
       <div class="form-group">
         <label>Extraction type</label>
         <div class="option-grid">
+          {% set has_preview = ['1', '2', '3', '4', '5', '7', '8'] %}
           {% for key, opt in options.items() %}
-            <label class="option-card">
-              <input type="radio" name="option" value="{{ key }}" {% if loop.first %}checked{% endif %} />
+            {% set locked = not session_file_name %}
+            <label class="option-card {% if locked %}option-card--locked{% endif %}">
+              <input type="radio" name="option" value="{{ key }}"
+                     {% if loop.first %}checked{% endif %}
+                     {% if locked %}disabled{% endif %} />
               <span class="option-label">{{ opt.label }}</span>
-              {% if key == "9" %}
-                <a href="{{ url_for('padlocks_detail') }}" class="option-info-link"
-                   title="View calculation details" onclick="event.stopPropagation()">ℹ</a>
+              {% if session_file_name %}
+                {% if key in has_preview %}
+                  <a href="{{ url_for('preview', option=key) }}" class="option-view-link"
+                     onclick="event.stopPropagation()">View →</a>
+                {% elif key == '9' %}
+                  <a href="{{ url_for('padlocks_detail') }}" class="option-view-link"
+                     onclick="event.stopPropagation()">View →</a>
+                {% endif %}
               {% endif %}
             </label>
           {% endfor %}
@@ -69,12 +78,9 @@
       </button>
     </form>
 
-    <div class="custom-link">
-      <a href="{{ url_for('custom') }}">Custom column selection →</a>
-      <span style="margin:0 .75rem;color:#ccc">|</span>
-      <a href="{{ url_for('study') }}">Study browser →</a>
-      <span style="margin:0 .75rem;color:#ccc">|</span>
-      <a href="{{ url_for('dashboard') }}">Dashboard →</a>
+    <div class="docs-btn-wrap">
+      <a href="{{ url_for('guide') }}" class="btn-docs">User Guide →</a>
+      <a href="{{ url_for('docs') }}" class="btn-docs">Technical Documentation →</a>
     </div>
 
     <script>
@@ -85,6 +91,17 @@
         });
       });
     </script>
+
+    {% if console_padlocks %}
+    <script>
+      (function() {
+        var data = {{ console_padlocks | tojson }};
+        console.groupCollapsed('%c PADLOCK SCORES ', 'background:#fc5424;color:#fff;font-weight:bold;border-radius:3px');
+        console.table(data);
+        console.groupEnd();
+      })();
+    </script>
+    {% endif %}
   </div>
 </body>
 </html>

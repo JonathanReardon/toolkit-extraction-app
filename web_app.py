@@ -4,9 +4,11 @@
 import io
 import json as json_module
 import os
+import re
 import tempfile
 import uuid
 
+import mistune
 import numpy as np
 
 from flask import (
@@ -103,16 +105,16 @@ def load_file():
 # ── Options ───────────────────────────────────────────────────────────────────
 
 DATAFRAME_OPTIONS = {
-    "1":  {"label": "DataFrame 1 – General Study Info",             "filename": "DataFrame1.csv"},
-    "2":  {"label": "DataFrame 2 – Participants & Schools",          "filename": "DataFrame2.csv"},
-    "3":  {"label": "DataFrame 3 – Sample Size",                     "filename": "DataFrame3_SampleSize.csv"},
-    "4":  {"label": "DataFrame 4 – Effect Size A",                   "filename": "DataFrame4_EffectSizeA.csv"},
-    "5":  {"label": "DataFrame 5 – Effect Size B",                   "filename": "DataFrame5_EffectSizeB.csv"},
-    "6":  {"label": "DataFrame 6 – Main Analysis (strand-specific)", "filename": "DataFrame6_MainAnalysis.csv"},
-    "7":  {"label": "DataFrame 7 – Other Educational Outcomes",      "filename": "DataFrame7_OtherEduOut.csv"},
-    "8":  {"label": "Study Security",                                 "filename": "StudySecurity.csv"},
-    "9":  {"label": "Padlocks",                                       "filename": "Padlocks.csv"},
-    "10": {"label": "References",                                     "filename": "References.csv"},
+    "1":  {"label": "1. General Study Info",             "filename": "DataFrame1.csv"},
+    "2":  {"label": "2. Participants & Schools",          "filename": "DataFrame2.csv"},
+    "3":  {"label": "3. Sample Size",                     "filename": "DataFrame3_SampleSize.csv"},
+    "4":  {"label": "4. Effect Size A",                   "filename": "DataFrame4_EffectSizeA.csv"},
+    "5":  {"label": "5. Effect Size B",                   "filename": "DataFrame5_EffectSizeB.csv"},
+    "6":  {"label": "6. Main Analysis (strand-specific)", "filename": "DataFrame6_MainAnalysis.csv"},
+    "7":  {"label": "7. Other Educational Outcomes",      "filename": "DataFrame7_OtherEduOut.csv"},
+    "8":  {"label": "8. Study Security",                  "filename": "StudySecurity.csv"},
+    "9":  {"label": "9. Padlocks",                        "filename": "Padlocks.csv"},
+    "10": {"label": "10. References",                     "filename": "References.csv"},
 }
 
 STRAND_OPTIONS = {
@@ -193,11 +195,45 @@ def padlocks_download():
         return redirect(url_for("padlocks_detail"))
 
 
+# ── Documentation ────────────────────────────────────────────────────────────
+
+def _render_md(filename):
+    path = os.path.join(os.path.dirname(__file__), "docs", filename)
+    with open(path, "r", encoding="utf-8") as f:
+        md_text = f.read()
+    headings = []
+    for line in md_text.splitlines():
+        m = re.match(r'^(#{1,3})\s+(.+)', line)
+        if m:
+            level = len(m.group(1))
+            title = m.group(2).strip()
+            anchor = re.sub(r'[^\w\s-]', '', title.lower()).strip()
+            anchor = re.sub(r'[\s]+', '-', anchor)
+            headings.append({"level": level, "title": title, "anchor": anchor})
+    return mistune.html(md_text), headings
+
+
+@app.route("/docs")
+def docs():
+    content, headings = _render_md("documentation.md")
+    return render_template("docs.html", content=content, headings=headings,
+                           page_title="Technical Documentation")
+
+
+@app.route("/guide")
+def guide():
+    content, headings = _render_md("user-guide.md")
+    return render_template("docs.html", content=content, headings=headings,
+                           page_title="User Guide")
+
+
 # ── Standard extraction ───────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
-    return render_template("index.html", options=DATAFRAME_OPTIONS, strands=STRAND_OPTIONS)
+    console_data = session.pop("console_padlocks", None)
+    return render_template("index.html", options=DATAFRAME_OPTIONS, strands=STRAND_OPTIONS,
+                           console_padlocks=console_data)
 
 
 @app.route("/extract", methods=["POST"])
@@ -256,6 +292,14 @@ def extract():
             rob = RiskofBias(json_extractor)
             rob.compile()
             df, _ = rob.padlocks(save_file=False)
+            print("\n" + "="*60)
+            print("PADLOCK SCORES")
+            print("="*60)
+            print(df.to_string(index=False))
+            print("="*60 + "\n")
+            session["console_padlocks"] = df.to_dict(orient="records")
+            flash("Padlock data printed to terminal and browser console.")
+            return redirect(url_for("index"))
         elif option == "10":
             df, _ = dfc.make_references(save_file=False)
 
