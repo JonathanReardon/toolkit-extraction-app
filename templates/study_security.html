@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Security – EEF Toolkit Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <div class="container" style="max-width:1200px">
+
+    {% include '_file_bar.html' %}
+
+    <!-- Top bar -->
+    <div class="padlock-topbar">
+      <div>
+        <a href="{{ url_for('index') }}" class="back-link" style="margin:0 0 .4rem">← Back to extractions</a>
+        <h1 style="margin:.3rem 0 .2rem">Study Security</h1>
+        <p style="color:#666;font-size:.9rem;margin:0">
+          Risk-of-bias assessment across {{ n_studies }} studies &middot; {{ criteria|length }} criteria
+        </p>
+      </div>
+      <a href="{{ url_for('study_security_download') }}" class="btn-extract"
+         style="padding:.6rem 1.4rem;font-size:.9rem;text-decoration:none">
+        ↓ Download CSV
+      </a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- How it works -->
+    <div class="padlock-explainer-box">
+      <h2>How study security is calculated</h2>
+      <p>
+        Each study is independently assessed across <strong>{{ criteria|length }} risk-of-bias criteria</strong>.
+        Each criterion is rated <span class="risk-badge risk-H">H</span> High Risk (score 1),
+        <span class="risk-badge risk-M">M</span> Medium Risk (score 2), or
+        <span class="risk-badge risk-L">L</span> Low Risk (score 3).
+        The <strong>total security score</strong> is the sum of all criteria ratings,
+        ranging from {{ criteria|length }} (all High risk) to {{ max_possible }} (all Low risk).
+        Higher scores indicate stronger, more methodologically secure studies.
+      </p>
+    </div>
+
+    <!-- Summary metric cards -->
+    <h2 style="font-size:1rem;color:#555;margin:1.5rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
+      Summary
+    </h2>
+    <div class="metric-row" style="flex-wrap:wrap">
+
+      <div class="metric-card">
+        <div class="metric-card-role">Dataset</div>
+        <div class="metric-card-title">Studies Assessed</div>
+        <div class="metric-card-value">{{ n_studies }}</div>
+        <div class="metric-card-desc">
+          Total number of studies included in the risk-of-bias assessment for this evidence base.
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-card-role">Average</div>
+        <div class="metric-card-title">Mean Security Score</div>
+        <div class="metric-card-value">{{ mean_total }}</div>
+        <div class="metric-card-badge badge-scale">out of {{ max_possible }}</div>
+        <div class="metric-card-desc">
+          The average total security score across all studies. Higher values indicate that studies are generally rated as lower risk across the assessed criteria.
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-card-role">Central tendency</div>
+        <div class="metric-card-title">Median Security Score</div>
+        <div class="metric-card-value">{{ median_total }}</div>
+        <div class="metric-card-badge badge-scale">out of {{ max_possible }}</div>
+        <div class="metric-card-desc">
+          The midpoint security score — half of studies score above this value and half below. Less sensitive to outliers than the mean.
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-card-role">Scoring scale</div>
+        <div class="metric-card-title">Score Range</div>
+        <div class="metric-card-value">{{ criteria|length }}–{{ max_possible }}</div>
+        <div class="metric-card-desc">
+          The minimum possible score is <strong>{{ criteria|length }}</strong> (all criteria rated High Risk)
+          and the maximum is <strong>{{ max_possible }}</strong> (all criteria rated Low Risk),
+          across {{ criteria|length }} assessed criteria per study.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Charts -->
+    <h2 style="font-size:1rem;color:#555;margin:1.75rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
+      Risk profile
+    </h2>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem;margin-bottom:1rem">
+
+      <!-- Score distribution -->
+      <div class="metric-card" style="display:flex;flex-direction:column">
+        <div class="metric-card-role">Distribution</div>
+        <div class="metric-card-title" style="margin-bottom:.75rem">Security Score Distribution</div>
+        <div id="chart-dist" style="flex:1"></div>
+        <p style="font-size:.8rem;color:#777;margin-top:.75rem;line-height:1.5">
+          Each bar represents the number of studies that achieved a given total security score.
+          A distribution skewed toward higher scores indicates a generally more secure evidence base.
+        </p>
+      </div>
+
+      <!-- Criteria breakdown -->
+      <div class="metric-card" style="display:flex;flex-direction:column">
+        <div class="metric-card-role">Breakdown</div>
+        <div class="metric-card-title" style="margin-bottom:.75rem">Risk Rating by Criterion</div>
+        <div id="chart-criteria" style="flex:1"></div>
+        <p style="font-size:.8rem;color:#777;margin-top:.75rem;line-height:1.5">
+          For each of the {{ criteria|length }} assessment criteria, this chart shows how many studies were rated
+          <strong style="color:#c62828">High</strong>,
+          <strong style="color:#e65100">Medium</strong>, or
+          <strong style="color:#2e7d32">Low</strong> risk.
+          Criteria with a large red segment indicate areas of particular methodological concern across the evidence base.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Per-study table -->
+    <h2 style="font-size:1rem;color:#555;margin:1.75rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
+      Per-study ratings
+    </h2>
+    <div class="metric-card" style="padding:0;overflow:hidden">
+      <div style="padding:1rem 1.25rem .5rem;border-bottom:1px solid #eee;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <span class="metric-card-role" style="margin:0">All studies</span>
+        <span style="font-size:.78rem;color:#888">
+          <span class="risk-cell risk-cell--h" style="padding:.1rem .4rem;border-radius:3px">H</span> High risk &nbsp;
+          <span class="risk-cell risk-cell--m" style="padding:.1rem .4rem;border-radius:3px">M</span> Medium risk &nbsp;
+          <span class="risk-cell risk-cell--l" style="padding:.1rem .4rem;border-radius:3px">L</span> Low risk
+        </span>
+      </div>
+      <div class="preview-table-wrap" style="max-height:520px">
+        <table class="preview-table security-table">
+          <thead>
+            <tr>
+              <th>Author</th>
+              <th>Year</th>
+              <th>Total</th>
+              {% for label, _ in criteria %}
+              <th title="{{ label }}">{{ label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in studies %}
+            <tr>
+              <td>{{ s.author }}</td>
+              <td>{{ s.year }}</td>
+              <td><strong>{{ s.raw_total }}</strong></td>
+              {% for _, col in criteria %}
+              {% set val = s[col] %}
+              <td class="risk-cell risk-cell--{{ val|lower }}">{{ val }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    new ApexCharts(document.getElementById('chart-dist'), {
+      chart: { type: 'bar', height: 220, toolbar: { show: false }, fontFamily: 'inherit' },
+      series: [{ name: 'Studies', data: {{ dist_counts | tojson }} }],
+      xaxis: {
+        categories: {{ dist_labels | tojson }},
+        title: { text: 'Total security score', style: { fontSize: '11px', color: '#888' } },
+        labels: { style: { fontSize: '11px' } },
+        tooltip: { enabled: false }
+      },
+      yaxis: {
+        title: { text: 'Number of studies', style: { fontSize: '11px', color: '#888' } },
+        labels: { style: { fontSize: '11px' } }
+      },
+      colors: ['#fc5424'],
+      plotOptions: { bar: { borderRadius: 3, columnWidth: '60%' } },
+      dataLabels: { enabled: false },
+      grid: { borderColor: '#f0f0f0' },
+      tooltip: { y: { formatter: v => v + ' studies' } }
+    }).render();
+
+    new ApexCharts(document.getElementById('chart-criteria'), {
+      chart: { type: 'bar', height: 320, stacked: true, toolbar: { show: false }, fontFamily: 'inherit' },
+      series: [
+        { name: 'High Risk',   data: {{ criteria_summary | map(attribute='H') | list | tojson }} },
+        { name: 'Medium Risk', data: {{ criteria_summary | map(attribute='M') | list | tojson }} },
+        { name: 'Low Risk',    data: {{ criteria_summary | map(attribute='L') | list | tojson }} },
+      ],
+      colors: ['#e53935', '#fb8c00', '#43a047'],
+      xaxis: {
+        categories: {{ criteria_summary | map(attribute='label') | list | tojson }},
+        labels: { style: { fontSize: '11px' }, rotate: -35, rotateAlways: true },
+        tooltip: { enabled: false }
+      },
+      yaxis: { labels: { style: { fontSize: '11px' } } },
+      plotOptions: { bar: { borderRadius: 2, columnWidth: '55%' } },
+      dataLabels: { enabled: false },
+      legend: { position: 'top', fontSize: '12px' },
+      grid: { borderColor: '#f0f0f0' },
+      tooltip: { y: { formatter: v => v + ' studies' } }
+    }).render();
+  </script>
+</body>
+</html>

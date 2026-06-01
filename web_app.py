@@ -195,6 +195,119 @@ def padlocks_download():
         return redirect(url_for("padlocks_detail"))
 
 
+# ── Study Security ────────────────────────────────────────────────────────────
+
+SECURITY_CRITERIA = [
+    ("Publication Year",        "pub_year_risk_value"),
+    ("Publication Type",        "pub_type_risk_value"),
+    ("Participant Assignment",  "part_assig_risk_value"),
+    ("Randomisation",           "rand_risk_value"),
+    ("Outcome Test Type",       "out_test_type_raw_risk_value"),
+    ("Ecological Validity",     "eco_valid_risk_value"),
+    ("Intervention Delivery",   "int_who_raw_risk_value"),
+    ("Schools (Treatment)",     "school_treat_risk_value"),
+    ("Sample Size",             "sample_size_risk_value"),
+    ("Classes (Total)",         "class_total_risk_value"),
+    ("Outcome Evaluation",      "out_eval_risk_value"),
+    ("Effect Size Type",        "out_es_type_risk_value"),
+    ("Comparability Analysis",  "comp_anal_risk_value"),
+    ("Attrition",               "attri_perc_info_risk_value"),
+    ("Clustering Analysis",     "clust_anal_risk_value"),
+]
+
+def _risk_label(val):
+    try:
+        v = int(float(val))
+    except (TypeError, ValueError):
+        return "NA"
+    return {1: "H", 2: "M", 3: "L"}.get(v, "NA")
+
+
+@app.route("/study-security")
+def study_security_detail():
+    _, filepath, _ = _session_file()
+    if not filepath:
+        flash("Please load a JSON file first.")
+        return redirect(url_for("index"))
+    try:
+        json_extractor = JSONDataExtractor(filepath)
+        rob = RiskofBias(json_extractor)
+        rob.compile()
+        rdf = rob.risk_of_bias_df
+
+        n_studies = len(rdf)
+
+        # Per-criterion H/M/L counts
+        criteria_summary = []
+        for label, col in SECURITY_CRITERIA:
+            col_num = pd.to_numeric(rdf[col], errors="coerce")
+            h = int((col_num == 1).sum())
+            m = int((col_num == 2).sum())
+            l = int((col_num == 3).sum())
+            criteria_summary.append({"label": label, "H": h, "M": m, "L": l})
+
+        # raw_total distribution
+        totals = pd.to_numeric(rdf["raw_total"], errors="coerce").dropna()
+        mean_total  = round(float(totals.mean()), 2)
+        median_total = round(float(totals.median()), 2)
+        max_possible = len(SECURITY_CRITERIA) * 3
+
+        # Distribution buckets (raw_total as int)
+        dist = totals.astype(int).value_counts().sort_index()
+        dist_labels = [str(i) for i in dist.index.tolist()]
+        dist_counts = dist.values.tolist()
+
+        # Per-study table: author, year, raw_total, mean, and H/M/L for each criterion
+        studies = []
+        for _, row in rdf.iterrows():
+            study = {
+                "author":    row.get("pub_author", ""),
+                "year":      row.get("pub_year", ""),
+                "raw_total": row.get("raw_total", ""),
+                "mean":      round(float(row.get("Mean", 0) or 0), 2),
+            }
+            for _, col in SECURITY_CRITERIA:
+                study[col] = _risk_label(row.get(col))
+            studies.append(study)
+
+        return render_template(
+            "study_security.html",
+            n_studies=n_studies,
+            mean_total=mean_total,
+            median_total=median_total,
+            max_possible=max_possible,
+            criteria_summary=criteria_summary,
+            dist_labels=dist_labels,
+            dist_counts=dist_counts,
+            studies=studies,
+            criteria=SECURITY_CRITERIA,
+        )
+    except Exception as exc:
+        flash(f"Study security calculation failed: {exc}")
+        return redirect(url_for("index"))
+
+
+@app.route("/study-security/download")
+def study_security_download():
+    _, filepath, _ = _session_file()
+    if not filepath:
+        flash("Please load a JSON file first.")
+        return redirect(url_for("index"))
+    try:
+        json_extractor = JSONDataExtractor(filepath)
+        rob = RiskofBias(json_extractor)
+        rob.compile()
+        df = rob.risk_of_bias_df
+        output = io.BytesIO()
+        df.to_csv(output, index=False, encoding="utf-8-sig")
+        output.seek(0)
+        return send_file(output, mimetype="text/csv", as_attachment=True,
+                         download_name="StudySecurity.csv")
+    except Exception as exc:
+        flash(f"Download failed: {exc}")
+        return redirect(url_for("study_security_detail"))
+
+
 # ── Documentation ────────────────────────────────────────────────────────────
 
 def _render_md(filename):

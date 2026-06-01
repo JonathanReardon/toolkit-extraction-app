@@ -1439,3 +1439,36 @@ input[type="file"]:focus {
   content: '// ';
   opacity: .6;
 }
+
+/* ── Study Security table ───────────────────────────────────────── */
+
+.security-table th {
+  white-space: nowrap;
+  font-size: .72rem;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.risk-cell {
+  text-align: center;
+  font-weight: 700;
+  font-size: .78rem;
+  white-space: nowrap;
+}
+
+.risk-cell--h { background: #fdecea; color: #c62828; }
+.risk-cell--m { background: #fff3e0; color: #e65100; }
+.risk-cell--l { background: #e8f5e9; color: #2e7d32; }
+.risk-cell--na { color: #bbb; font-weight: 400; }
+
+.metric-card--explain {
+  grid-column: span 1;
+}
+
+.metric-explain-text {
+  font-size: .85rem;
+  color: #555;
+  line-height: 1.6;
+  margin-top: .4rem;
+}

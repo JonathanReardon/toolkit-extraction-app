@@ -30,7 +30,7 @@
       <div class="form-group">
         <label>Extraction type</label>
         <div class="option-grid">
-          {% set has_preview = ['1', '2', '3', '4', '5', '7', '8'] %}
+          {% set has_preview = ['1', '2', '3', '4', '5', '7'] %}
           {% for key, opt in options.items() %}
             {% set locked = not session_file_name %}
             <label class="option-card {% if locked %}option-card--locked{% endif %}">
@@ -41,6 +41,9 @@
               {% if session_file_name %}
                 {% if key in has_preview %}
                   <a href="{{ url_for('preview', option=key) }}" class="option-view-link"
+                     onclick="event.stopPropagation()">View →</a>
+                {% elif key == '8' %}
+                  <a href="{{ url_for('study_security_detail') }}" class="option-view-link"
                      onclick="event.stopPropagation()">View →</a>
                 {% elif key == '9' %}
                   <a href="{{ url_for('padlocks_detail') }}" class="option-view-link"
