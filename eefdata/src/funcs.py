@@ -3774,7 +3774,7 @@ class StrandSpecificFrames:
         pp_reward_recip_df = self.data_extraction.retrieve_data(pp_reward_recipient_output, "pp_reward_recip")
         pp_incent_timing_df = self.data_extraction.retrieve_data(pp_incentive_timing_output, "pp_incent_timing")
         pp_incent_type_df = self.data_extraction.retrieve_data(pp_incentive_type_output, "pp_incent_type")
-        pp_incent_amount_df = self.data_extraction.retrieve_data(pp_incentive_amount_output, "pp_incent_amount")
+        pp_incent_amount_df = self.data_extraction.retrieve_info(pp_incentive_amount_output, "pp_incent_amount")
         pp_teach_eval_per_df = self.data_extraction.retrieve_data(pp_teacher_eval_period_output, "pp_teach_eval_per")
         
         pp_ss_df = pd.concat([
@@ -4601,7 +4601,7 @@ class RiskofBias:
         perc_recent = np.round(perc_recent, 2) """
 
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
-        perc_recent = (self.risk_of_bias_df["pub_year"] > 2000).mean() * 100
+        perc_recent = (self.risk_of_bias_df["pub_year"] > 2010).mean() * 100
         perc_recent = round(perc_recent, 2)
 
         #print(f"perc_recent: {perc_recent}")
@@ -4714,7 +4714,7 @@ class RiskofBias:
         df.columns = [
             "strand",
             "number_of_studies",
-            "%_since_2000",
+            "%_since_2010",
             "total_pupil_number",
             "%_randomised",
             "%_high_eco_valid",
@@ -4748,10 +4748,10 @@ class RiskofBias:
         # apply padlock function to number of studies column
         df["%_since_2000_padlock_scale"] = df.apply(lambda row: perc_recent_risk(row), axis=1) """
 
-        df["%_since_2000"] = pd.to_numeric(df["%_since_2000"], errors='coerce').fillna(0)
+        df["%_since_2010"] = pd.to_numeric(df["%_since_2010"], errors='coerce').fillna(0)
 
-        df["%_since_2000_padlock_scale"] = pd.cut(
-            df["%_since_2000"],
+        df["%_since_2010_padlock_scale"] = pd.cut(
+            df["%_since_2010"],
             bins=[-np.inf, 25, 50, np.inf],
             labels=['H', 'M', 'L'],
             right=False,
@@ -4936,7 +4936,7 @@ class RiskofBias:
             (df["%_randomised_padlock_scale"] == "H").astype(int) +
             (df["%_high_eco_valid_padlock_scale"] == "H").astype(int) +
             (df["%_indep_eval_padlock_scale"] == "H").astype(int) +
-            (df["%_since_2000_padlock_scale"] == "H").astype(int) +
+            (df["%_since_2010_padlock_scale"] == "H").astype(int) +
             (df["%_median_attrit_reported_padlock_scale"] == "H").astype(int)
         )
         df["New_padlock"] = (df["New_padlock"] - deductions).clip(lower=0)
@@ -4946,8 +4946,8 @@ class RiskofBias:
             "strand",
             "number_of_studies",
             "number_of_studies_padlock_scale",
-            "%_since_2000",
-            "%_since_2000_padlock_scale",
+            "%_since_2010",
+            "%_since_2010_padlock_scale",
             "%_randomised",
             "%_randomised_padlock_scale",
             "%_high_eco_valid",
