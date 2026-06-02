@@ -4398,13 +4398,7 @@ class RiskofBias:
 
             if cleaned_value == 'yes':
                 self.InterventionEvaluation_df.at[index, 'out_eval_risk'] = 'Low Risk'
-                
-                # Check if out_eval_risk_value is numeric and update it
-                if isinstance(self.InterventionEvaluation_df.at[index, 'out_eval_risk_value'], (int, float, np.number)):
-                    self.InterventionEvaluation_df.at[index, 'out_eval_risk_value'] = 3
-                else:
-                    # Convert to integer if not already
-                    self.InterventionEvaluation_df.at[index, 'out_eval_risk_value'] = int(3)
+                self.InterventionEvaluation_df.at[index, 'out_eval_risk_value'] = '3'
 
         
 
