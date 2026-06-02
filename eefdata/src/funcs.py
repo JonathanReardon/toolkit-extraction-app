@@ -5008,7 +5008,7 @@ def group_desc_stats(json_extractor, attribute_text, column_prefix):
     mask = mask.iloc[:, 0]
     # replace all 0 instances (null data) with "NA"
     for col in group_data_df.columns:
-        group_data_df.loc[mask, col] = "NA"
+        group_data_df.loc[mask, col] = float("nan")
     return group_data_df
 
 
