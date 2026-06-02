@@ -2180,7 +2180,7 @@ class DataFrameCompilation:
         ]
         values = ['TRUE', 'FALSE']
 
-        df_all['fsm_50'] = np.select(conditions, values)
+        df_all['fsm_50'] = np.select(conditions, values, default='NA')
 
         df_all["fsm_perc_info"] = df_all["fsm_perc_info"].replace(
             to_replace=np.nan, value="NA", regex=True
@@ -4686,7 +4686,7 @@ class RiskofBias:
             (self.intervention_delivery_df["external teachers"] == False),
         ]
         values = ['1']
-        self.intervention_delivery_df['research_staff_only'] = np.select(conditions, values)
+        self.intervention_delivery_df['research_staff_only'] = np.select(conditions, values, default='0')
         research_staff_only = (self.intervention_delivery_df["research_staff_only"] == "1").sum()/len(self.intervention_delivery_df*100)
 
         # print(f"research_staff_only: {research_staff_only}")
