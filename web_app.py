@@ -6,6 +6,7 @@ import json as json_module
 import os
 import re
 import tempfile
+import traceback
 import uuid
 
 import mistune
@@ -170,6 +171,7 @@ def padlocks_detail():
 
         return render_template("padlocks.html", data=row)
     except Exception as exc:
+        traceback.print_exc()
         flash(f"Padlocks calculation failed: {exc}")
         return redirect(url_for("index"))
 
