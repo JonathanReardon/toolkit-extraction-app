@@ -4602,7 +4602,7 @@ class RiskofBias:
 
         # total pupil number
         number_of_studies = len(self.risk_of_bias_df)
-        total_pupil_number = self.risk_of_bias_df["sample_analysed_info"].sum().astype(int)
+        total_pupil_number = int(pd.to_numeric(self.risk_of_bias_df["sample_analysed_info"], errors='coerce').sum())
 
         # print(f"total_pupil_number: {total_pupil_number}")
 
