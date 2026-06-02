@@ -4553,7 +4553,7 @@ class RiskofBias:
         self.risk_of_bias_df.replace(':', ' ',  regex=True, inplace=True)
         self.risk_of_bias_df.replace(';', ' ',  regex=True, inplace=True)
         self.risk_of_bias_df.replace(r'^\s*$', "NA", regex=True)
-        self.risk_of_bias_df.fillna('NA', inplace=True)
+        self.risk_of_bias_df = self.risk_of_bias_df.astype(object).fillna('NA')
 
         # Append raw_total column to the end of the data frame
         final_score_col = self.risk_of_bias_df.pop('raw_total')
