@@ -4014,7 +4014,7 @@ class RiskofBias:
             (self.year_df["pub_year_raw_risk"] == 'Medium Risk'),
             (self.year_df["pub_year_raw_risk"] == 'Low Risk'),
         ]
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.year_df['pub_year_risk_value'] = np.select(conditions, choices, default="NA")
         return self.year_df
@@ -4043,7 +4043,7 @@ class RiskofBias:
             (self.overall_percent_attrition_Comments_df["attri_perc_info_raw_risk"] == 'Medium Risk'),
             (self.overall_percent_attrition_Comments_df["attri_perc_info_raw_risk"] == 'Low Risk'),
         ]
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.overall_percent_attrition_Comments_df['attri_perc_info_risk_value'] = np.select(conditions, choices, default="NA")
         return self.overall_percent_attrition_Comments_df
@@ -4073,7 +4073,7 @@ class RiskofBias:
             (self.clustering_df["clust_anal_raw_risk"] == 'High Risk'),
         ]
 
-        choices = [2,1]
+        choices = ['2', '1']
 
         self.clustering_df["clust_anal_risk_value"] = np.select(conditions, choices, default="NA")
         return self.clustering_df
@@ -4105,7 +4105,7 @@ class RiskofBias:
             (self.toolkit_es_type["out_es_type_raw_risk"] == 'Low Risk'),
         ]
 
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.toolkit_es_type["out_es_type_risk_value"] = np.select(conditions, choices, default="NA")
         return self.toolkit_es_type
@@ -4139,7 +4139,7 @@ class RiskofBias:
             (self.toolkit_test_type["out_test_type_raw_risk"] == 'Low Risk'),
         ]
 
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.toolkit_test_type["out_test_type_raw_risk_value"] = np.select(
             conditions, choices, default="NA")
@@ -4162,7 +4162,7 @@ class RiskofBias:
             (self.sample_size_Comments_df["sample_size_risk"] == 'Medium Risk'),
             (self.sample_size_Comments_df["sample_size_risk"] == 'Low Risk'),
         ]
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.sample_size_Comments_df['sample_size_risk_value'] = np.select(
             conditions, choices, default="NA")
@@ -4191,7 +4191,7 @@ class RiskofBias:
             (self.publicationtype_df["pub_type_risk"] == 'Low Risk'),
         ]
 
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.publicationtype_df["pub_type_risk_value"] = np.select(conditions, choices, default="NA")
         return self.publicationtype_df
@@ -4216,7 +4216,7 @@ class RiskofBias:
             (self.participant_assignment_df['part_assig_risk'] == 'Medium Risk'),
             (self.participant_assignment_df['part_assig_risk'] == 'Low Risk'),
         ]
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.participant_assignment_df['part_assig_risk_value'] = np.select(conditions, choices, default="NA")
         return self.participant_assignment_df
@@ -4237,7 +4237,7 @@ class RiskofBias:
             (self.randomisation_df['rand_risk'] == 'Medium Risk'),
             (self.randomisation_df['rand_risk'] == 'Medium Risk'),
         ]
-        choices = [3, 2, 2]
+        choices = ['3', '2', '2']
 
         self.randomisation_df['rand_risk_value'] = np.select(conditions, choices, default="NA")
         return self.randomisation_df
@@ -4257,7 +4257,7 @@ class RiskofBias:
             (self.study_realism_df['eco_valid_risk'] == 'Low Risk'),
             (self.study_realism_df['eco_valid_risk'] == 'High Risk'),
         ]
-        choices = [3, 1]
+        choices = ['3', '1']
 
         self.study_realism_df['eco_valid_risk_value'] = np.select(conditions, choices, default="NA")
         return self.study_realism_df
@@ -4280,7 +4280,7 @@ class RiskofBias:
             (self.number_of_schools_intervention_Comments_df["school_treat_risk"] == 'Medium Risk'),
             (self.number_of_schools_intervention_Comments_df["school_treat_risk"] == 'Low Risk'),
         ]
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.number_of_schools_intervention_Comments_df['school_treat_risk_value'] = np.select(conditions, choices, default="NA")
         return self.number_of_schools_intervention_Comments_df
@@ -4307,7 +4307,7 @@ class RiskofBias:
             (self.number_of_classes_total_Comments_df["class_total_info_risk"] == 'Low Risk'),
             (self.number_of_classes_total_Comments_df["class_total_info_risk"] == 'NA'),
         ]
-        choices = [1, 2, 3, np.nan]
+        choices = ['1', '2', '3', 'NA']
 
         self.number_of_classes_total_Comments_df['class_total_risk_value'] = np.select(conditions, choices, default="NA")
         return self.number_of_classes_total_Comments_df
@@ -4378,7 +4378,7 @@ class RiskofBias:
             (self.InterventionEvaluation_df["out_eval_risk"] == 'Low Risk'),
         ]
 
-        choices = [1, 2, 3]
+        choices = ['1', '2', '3']
 
         self.InterventionEvaluation_df["out_eval_risk_value"] = np.select(conditions, choices, default="NA")
 
@@ -4431,7 +4431,7 @@ class RiskofBias:
             (self.comparability_df['comp_anal_risk'] == 'Medium Risk'),
             (self.comparability_df['comp_anal_risk'] == 'High Risk'),
         ]
-        choices = [3, 2, 1]
+        choices = ['3', '2', '1']
 
         self.comparability_df["comp_anal_risk_value"] = np.select(conditions, choices, default="NA")
         return self.comparability_df
