@@ -206,7 +206,7 @@ class JSONDataExtractor:
         outcome_data = self.get_outcome_lvl1(attribute_text)
         outcome_df = pd.DataFrame(outcome_data)
         # round data to 4 decimal places
-        outcome_df = outcome_df.applymap(lambda x: round(x, 4) if isinstance(x, (int, float)) else x)
+        outcome_df = outcome_df.map(lambda x: round(x, 4) if isinstance(x, (int, float)) else x)
         # name each column (number depends on outcome number)
         outcome_df.columns = [column_prefix+'{}'.format(column+1) for column in outcome_df.columns]
 
@@ -4601,7 +4601,7 @@ class RiskofBias:
         perc_recent = np.round(perc_recent, 2) """
 
         self.risk_of_bias_df["pub_year"] = pd.to_numeric(self.risk_of_bias_df["pub_year"], errors='coerce')
-        perc_recent = (self.risk_of_bias_df["pub_year"] > 2010).mean() * 100
+        perc_recent = (self.risk_of_bias_df["pub_year"] > 2000).mean() * 100
         perc_recent = round(perc_recent, 2)
 
         #print(f"perc_recent: {perc_recent}")
