@@ -3,3 +3,4 @@ pandas>=1.5.0
 werkzeug>=3.0
 toolz>=0.11.2
 mistune>=3.0
+gunicorn>=21.0
