@@ -206,7 +206,7 @@ class JSONDataExtractor:
         outcome_data = self.get_outcome_lvl1(attribute_text)
         outcome_df = pd.DataFrame(outcome_data)
         # round data to 4 decimal places
-        outcome_df = outcome_df.map(lambda x: round(x, 4) if isinstance(x, (int, float)) else x)
+        outcome_df = outcome_df.apply(lambda col: col.apply(lambda x: round(x, 4) if isinstance(x, (int, float)) else x))
         # name each column (number depends on outcome number)
         outcome_df.columns = [column_prefix+'{}'.format(column+1) for column in outcome_df.columns]
 
@@ -4733,20 +4733,20 @@ class RiskofBias:
         # % studies since 2000 padlock scale
         ########################################
 
-        """ # convert %_since_2000 data to numeric
-        df["%_since_2000"] = pd.to_numeric(df["%_since_2000"], errors='coerce').fillna(0)
+        """ # convert %_since_2010 data to numeric
+        df["%_since_2010"] = pd.to_numeric(df["%_since_2010"], errors='coerce').fillna(0)
 
         def perc_recent_risk(row):
-            if row["%_since_2000"] > 49:
+            if row["%_since_2010"] > 49:
                 return 'L'
-            if row["%_since_2000"] > 25 and row["%_since_2000"] < 50:
+            if row["%_since_2010"] > 25 and row["%_since_2010"] < 50:
                 return 'M'
-            if row["%_since_2000"] < 25:
+            if row["%_since_2010"] < 25:
                 return 'H'
             return 'NA'
 
         # apply padlock function to number of studies column
-        df["%_since_2000_padlock_scale"] = df.apply(lambda row: perc_recent_risk(row), axis=1) """
+        df["%_since_2010_padlock_scale"] = df.apply(lambda row: perc_recent_risk(row), axis=1) """
 
         df["%_since_2010"] = pd.to_numeric(df["%_since_2010"], errors='coerce').fillna(0)
 
@@ -4756,7 +4756,7 @@ class RiskofBias:
             labels=['H', 'M', 'L'],
             right=False,
             include_lowest=True
-)
+        ).astype(str)
 
         ########################################
         # _median_attrit_reported padlock scale
@@ -4785,7 +4785,7 @@ class RiskofBias:
             labels=['L', 'M', 'H'],
             right=False,
             include_lowest=True
-        )
+        ).astype(str)
 
 
         ########################################
@@ -4817,7 +4817,7 @@ class RiskofBias:
 
         bins = [0, 10, 25, 35, 60, 90, np.inf]
         labels = ['0', '1', '2', '3', '4', '5']
-        df["number_of_studies_padlock_scale"] = pd.cut(df["number_of_studies"], bins=bins, labels=labels, right=False, include_lowest=True)
+        df["number_of_studies_padlock_scale"] = pd.cut(df["number_of_studies"], bins=bins, labels=labels, right=False, include_lowest=True).astype(str)
 
 
         ########################################
@@ -4846,7 +4846,7 @@ class RiskofBias:
             labels=['H', 'M', 'L'],
             right=False,
             include_lowest=True
-        )
+        ).astype(str)
 
 
         ########################################
@@ -4875,7 +4875,7 @@ class RiskofBias:
             labels=['H', 'M', 'L'],
             right=False,
             include_lowest=True
-        )
+        ).astype(str)
 
 
         ########################################
@@ -4904,7 +4904,7 @@ class RiskofBias:
             labels=['H', 'M', 'L'],
             right=False,
             include_lowest=True
-        )
+        ).astype(str)
 
 
         ####################################################
@@ -4921,7 +4921,7 @@ class RiskofBias:
                 df["New_padlock"] = df["New_padlock"] - 1
             if row["%_indep_eval_padlock_scale"] == "H":
                 df["New_padlock"] = df["New_padlock"] - 1
-            if row["%_since_2000_padlock_scale"] == "H":
+            if row["%_since_2010_padlock_scale"] == "H":
                 df["New_padlock"] = df["New_padlock"] - 1
             if row["%_median_attrit_reported_padlock_scale"] == "H":
                 df["New_padlock"] = df["New_padlock"] - 1

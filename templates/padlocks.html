@@ -216,7 +216,7 @@
       {% set r_h  = data['%_randomised_padlock_scale']|string == 'H' %}
       {% set e_h  = data['%_high_eco_valid_padlock_scale']|string == 'H' %}
       {% set i_h  = data['%_indep_eval_padlock_scale']|string == 'H' %}
-      {% set s_h  = data['%_since_2000_padlock_scale']|string == 'H' %}
+      {% set s_h  = data['%_since_2010_padlock_scale']|string == 'H' %}
       {% set a_h  = data['%_median_attrit_reported_padlock_scale']|string == 'H' %}
       {% set sc0 = base %}
       {% set sc1 = [sc0 - (1 if s_h else 0), 0]|max %}
