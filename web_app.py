@@ -349,6 +349,21 @@ def index():
                            console_padlocks=console_data)
 
 
+@app.route("/design/a")
+def design_a():
+    return render_template("index_a.html", options=DATAFRAME_OPTIONS, strands=STRAND_OPTIONS)
+
+
+@app.route("/design/b")
+def design_b():
+    return render_template("index_b.html", options=DATAFRAME_OPTIONS, strands=STRAND_OPTIONS)
+
+
+@app.route("/design/c")
+def design_c():
+    return render_template("index_c.html", options=DATAFRAME_OPTIONS, strands=STRAND_OPTIONS)
+
+
 @app.route("/extract", methods=["POST"])
 def extract():
     option = request.form.get("option", "")
