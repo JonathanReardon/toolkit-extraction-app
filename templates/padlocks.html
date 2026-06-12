@@ -81,12 +81,12 @@
         <table class="threshold-table">
           <thead><tr><th>Studies</th><th>Score</th></tr></thead>
           <tbody>
-            <tr {% if n < 10 %}class="thresh-active"{% endif %}><td>&lt; 10</td><td>0 🔒</td></tr>
-            <tr {% if 10 <= n < 25 %}class="thresh-active"{% endif %}><td>10 – 24</td><td>1 🔒</td></tr>
-            <tr {% if 25 <= n < 35 %}class="thresh-active"{% endif %}><td>25 – 34</td><td>2 🔒</td></tr>
-            <tr {% if 35 <= n < 60 %}class="thresh-active"{% endif %}><td>35 – 59</td><td>3 🔒</td></tr>
-            <tr {% if 60 <= n < 90 %}class="thresh-active"{% endif %}><td>60 – 89</td><td>4 🔒</td></tr>
-            <tr {% if n >= 90 %}class="thresh-active"{% endif %}><td>≥ 90</td><td>5 🔒</td></tr>
+            <tr {% if n < 11 %}class="thresh-active"{% endif %}><td>&lt; 11</td><td>0 🔒</td></tr>
+            <tr {% if 11 <= n < 40 %}class="thresh-active"{% endif %}><td>11 – 39</td><td>1 🔒</td></tr>
+            <tr {% if 40 <= n < 60 %}class="thresh-active"{% endif %}><td>40 – 59</td><td>2 🔒</td></tr>
+            <tr {% if 60 <= n < 80 %}class="thresh-active"{% endif %}><td>60 – 79</td><td>3 🔒</td></tr>
+            <tr {% if 80 <= n < 120 %}class="thresh-active"{% endif %}><td>80 – 119</td><td>4 🔒</td></tr>
+            <tr {% if n >= 120 %}class="thresh-active"{% endif %}><td>≥ 120</td><td>5 🔒</td></tr>
           </tbody>
         </table>
       </div>

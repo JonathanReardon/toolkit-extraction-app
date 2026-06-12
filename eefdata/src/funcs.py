@@ -926,6 +926,7 @@ class DataFrameCompilation:
         all_variables.replace('\n', ' ', regex=True, inplace=True)
         all_variables.replace(':', ' ',  regex=True, inplace=True)
         all_variables.replace(';', ' ',  regex=True, inplace=True)
+        all_variables = all_variables.astype(object).fillna('NA')
         
         if verbose:
             self.data_extraction.verbose_display(all_variables)
@@ -4356,6 +4357,13 @@ class RiskofBias:
     def rob_out_eval(self):
         #del self.InterventionEvaluation_df['eef_eval_raw']
 
+        # out_eval_raw is multi-select: flag independent evaluation if it
+        # appears anywhere in the selections, before truncating to the
+        # first selection below
+        indep = "An organization commissioned independently to evaluate"
+        self.indep_eval_flag = self.InterventionEvaluation_df['out_eval_raw'].apply(
+            lambda v: indep in v if isinstance(v, list) else v == indep)
+
         self.InterventionEvaluation_df['out_eval_raw'] = self.InterventionEvaluation_df['out_eval_raw'].str[0]
 
         self.InterventionEvaluation_df["eev_eval"] = self.eef_eval_df
@@ -4606,8 +4614,8 @@ class RiskofBias:
 
         # print(f"total_pupil_number: {total_pupil_number}")
 
-        # percentage randomised
-        perc_randomised = self.risk_of_bias_df[self.risk_of_bias_df["rand_raw"] == 'Yes'].shape[0]/len(self.risk_of_bias_df)*100
+        # percentage randomised (random participant assignment)
+        perc_randomised = self.risk_of_bias_df[self.risk_of_bias_df["part_assig_raw"] == 'Random (please specify)'].shape[0]/len(self.risk_of_bias_df)*100
         perc_randomised = np.round(perc_randomised, 1)
 
         # print(f"perc_randomised: {perc_randomised}")
@@ -4660,8 +4668,8 @@ class RiskofBias:
 
         #print(f"mean_class_risk: {mean_class_risk}")
 
-        # percentage independently evaluated
-        perc_indep_eval = self.risk_of_bias_df[self.risk_of_bias_df["out_eval_raw"] == 'An organization commissioned independently to evaluate'].shape[0]/len(self.risk_of_bias_df)*100
+        # percentage independently evaluated (multi-select aware flag set in rob_out_eval)
+        perc_indep_eval = self.indep_eval_flag.sum()/len(self.risk_of_bias_df)*100
         perc_indep_eval = np.round(perc_indep_eval, 1)
 
         #print(f"perc_indep_eval: {perc_indep_eval}")
@@ -4809,7 +4817,7 @@ class RiskofBias:
 
         df["number_of_studies"] = pd.to_numeric(df["number_of_studies"], errors='coerce').fillna(0)
 
-        bins = [0, 10, 25, 35, 60, 90, np.inf]
+        bins = [0, 11, 40, 60, 80, 120, np.inf]
         labels = ['0', '1', '2', '3', '4', '5']
         df["number_of_studies_padlock_scale"] = pd.cut(df["number_of_studies"], bins=bins, labels=labels, right=False, include_lowest=True).astype(str)
 

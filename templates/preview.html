@@ -87,12 +87,22 @@
     {% endif %}
 
     {% if records %}
+    <div class="col-filter-bar">
+      <span class="table-filter-count" id="filter-count">{{ records|length }} rows</span>
+      <button class="col-filter-clear" id="clear-filters" type="button">Clear filters</button>
+    </div>
     <div class="preview-table-wrap">
-      <table class="preview-table">
+      <table class="preview-table" id="preview-table">
         <thead>
           <tr>
             {% for col in columns %}
-            <th>{{ col }}</th>
+            <th{% if loop.index0 < 2 %} class="sticky-col sticky-col-{{ loop.index0 }}"{% endif %}>{{ col }}</th>
+            {% endfor %}
+          </tr>
+          <tr class="filter-row" id="filter-row">
+            {% for col in columns %}
+            <th{% if loop.index0 < 2 %} class="sticky-col sticky-col-{{ loop.index0 }}"{% endif %}><input type="text" class="col-filter-input" data-col="{{ loop.index0 }}"
+                       placeholder="Filter…" autocomplete="off"></th>
             {% endfor %}
           </tr>
         </thead>
@@ -100,7 +110,7 @@
           {% for row in records %}
           <tr>
             {% for col in columns %}
-            <td>{{ row[col] if row[col] is not none and row[col] != 'None' else '' }}</td>
+            <td{% if loop.index0 < 2 %} class="sticky-col sticky-col-{{ loop.index0 }}"{% endif %}>{{ row[col] if row[col] is not none and row[col] != 'None' else '' }}</td>
             {% endfor %}
           </tr>
           {% endfor %}
@@ -113,5 +123,66 @@
 
   </div><!-- /.page-wrap -->
 
+  <script>
+    (function() {
+      var countEl = document.getElementById('filter-count');
+      var clearBtn = document.getElementById('clear-filters');
+      var rows = Array.from(document.querySelectorAll('#preview-table tbody tr'));
+      var inputs = Array.from(document.querySelectorAll('.col-filter-input'));
+      var total = rows.length;
+
+      function applyFilters() {
+        var filters = inputs.map(function(inp) {
+          return inp.value.toLowerCase().trim();
+        });
+        var active = filters.some(function(f) { return f !== ''; });
+        var visible = 0;
+        rows.forEach(function(row) {
+          var cells = row.querySelectorAll('td');
+          var match = filters.every(function(f, i) {
+            if (!f) return true;
+            var cell = cells[i];
+            return cell && cell.textContent.toLowerCase().includes(f);
+          });
+          row.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        countEl.textContent = active ? (visible + ' of ' + total + ' rows') : (total + ' rows');
+        clearBtn.style.display = active ? 'inline-block' : 'none';
+      }
+
+      inputs.forEach(function(inp) {
+        inp.addEventListener('input', applyFilters);
+      });
+
+      clearBtn.addEventListener('click', function() {
+        inputs.forEach(function(inp) { inp.value = ''; });
+        applyFilters();
+      });
+
+      clearBtn.style.display = 'none';
+
+      function setStickyOffsets() {
+        var table = document.getElementById('preview-table');
+        if (!table) return;
+        var firstHead = table.querySelector('thead tr:first-child .sticky-col-0');
+        if (firstHead) {
+          var w = firstHead.offsetWidth;
+          table.querySelectorAll('.sticky-col-1').forEach(function(c) {
+            c.style.left = w + 'px';
+          });
+        }
+        var headRow = table.querySelector('thead tr:first-child th');
+        if (headRow) {
+          var h = headRow.offsetHeight;
+          table.querySelectorAll('thead tr.filter-row th').forEach(function(c) {
+            c.style.top = h + 'px';
+          });
+        }
+      }
+      setStickyOffsets();
+      window.addEventListener('resize', setStickyOffsets);
+    })();
+  </script>
 </body>
 </html>
