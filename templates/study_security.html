@@ -135,6 +135,11 @@
     <h2 style="font-size:1rem;color:#555;margin:1.75rem 0 .75rem;text-transform:uppercase;letter-spacing:.05em">
       Per-study ratings
     </h2>
+    <div class="table-filter-bar">
+      <input type="text" id="security-filter" class="table-filter-input"
+             placeholder="Filter rows — type any value to search…" autocomplete="off">
+      <span class="table-filter-count" id="security-filter-count">{{ n_studies }} rows</span>
+    </div>
     <div class="metric-card" style="padding:0;overflow:hidden">
       <div style="padding:1rem 1.25rem .5rem;border-bottom:1px solid #eee;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
         <span class="metric-card-role" style="margin:0">All studies</span>
@@ -145,7 +150,7 @@
         </span>
       </div>
       <div class="preview-table-wrap" style="max-height:520px">
-        <table class="preview-table security-table">
+        <table class="preview-table security-table" id="security-table">
           <thead>
             <tr>
               <th>Author</th>
@@ -216,6 +221,24 @@
       grid: { borderColor: '#f0f0f0' },
       tooltip: { y: { formatter: v => v + ' studies' } }
     }).render();
+
+    (function() {
+      var input = document.getElementById('security-filter');
+      var countEl = document.getElementById('security-filter-count');
+      if (!input) return;
+      var rows = Array.from(document.querySelectorAll('#security-table tbody tr'));
+      var total = rows.length;
+      input.addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        var visible = 0;
+        rows.forEach(function(row) {
+          var match = !q || row.textContent.toLowerCase().includes(q);
+          row.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        countEl.textContent = q ? (visible + ' of ' + total + ' rows') : (total + ' rows');
+      });
+    })();
   </script>
 </body>
 </html>

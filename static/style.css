@@ -1421,6 +1421,45 @@ input[type="file"]:focus {
   line-height: 1;
 }
 
+.metric-card-raw {
+  font-size: .75rem;
+  color: #888;
+  margin-top: .15rem;
+  margin-bottom: .1rem;
+}
+
+.table-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+
+.table-filter-input {
+  flex: 1;
+  max-width: 360px;
+  padding: .45rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: .875rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--dark);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.table-filter-input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(252,84,36,.12);
+}
+
+.table-filter-count {
+  font-size: .8rem;
+  color: #888;
+  white-space: nowrap;
+}
+
 .metric-card-badge {
   display: flex;
   align-items: center;

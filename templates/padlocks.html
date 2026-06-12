@@ -94,10 +94,12 @@
       <!-- Card 2: % Since 2000 -->
       {% set v2 = data['%_since_2010']|float %}
       {% set r2 = data['%_since_2010_padlock_scale']|string %}
+      {% set c2 = (v2 / 100 * n) | round | int %}
       <div class="metric-card {% if r2 == 'H' %}metric-card--high{% endif %}">
         <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
-        <div class="metric-card-title">% Published Since 2000</div>
+        <div class="metric-card-title">% Published Since 2010</div>
         <div class="metric-card-value">{{ v2 }}%</div>
+        <div class="metric-card-raw">{{ c2 }} of {{ n }} studies</div>
         <div class="metric-card-badge">
           <span class="risk-badge risk-{{ r2 }}">{{ r2 }}</span>
           {% if r2 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
@@ -118,10 +120,12 @@
       <!-- Card 3: % Randomised -->
       {% set v3 = data['%_randomised']|float %}
       {% set r3 = data['%_randomised_padlock_scale']|string %}
+      {% set c3 = (v3 / 100 * n) | round | int %}
       <div class="metric-card {% if r3 == 'H' %}metric-card--high{% endif %}">
         <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
         <div class="metric-card-title">% Randomised</div>
         <div class="metric-card-value">{{ v3 }}%</div>
+        <div class="metric-card-raw">{{ c3 }} of {{ n }} studies</div>
         <div class="metric-card-badge">
           <span class="risk-badge risk-{{ r3 }}">{{ r3 }}</span>
           {% if r3 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
@@ -142,10 +146,12 @@
       <!-- Card 4: % High Ecological Validity -->
       {% set v4 = data['%_high_eco_valid']|float %}
       {% set r4 = data['%_high_eco_valid_padlock_scale']|string %}
+      {% set c4 = (v4 / 100 * n) | round | int %}
       <div class="metric-card {% if r4 == 'H' %}metric-card--high{% endif %}">
         <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
         <div class="metric-card-title">% High Ecological Validity</div>
         <div class="metric-card-value">{{ v4 }}%</div>
+        <div class="metric-card-raw">{{ c4 }} of {{ n }} studies</div>
         <div class="metric-card-badge">
           <span class="risk-badge risk-{{ r4 }}">{{ r4 }}</span>
           {% if r4 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
@@ -166,10 +172,12 @@
       <!-- Card 5: % Independently Evaluated -->
       {% set v5 = data['%_indep_eval']|float %}
       {% set r5 = data['%_indep_eval_padlock_scale']|string %}
+      {% set c5 = (v5 / 100 * n) | round | int %}
       <div class="metric-card {% if r5 == 'H' %}metric-card--high{% endif %}">
         <div class="metric-card-role">−1 if <span class="risk-badge risk-H">H</span></div>
         <div class="metric-card-title">% Independently Evaluated</div>
         <div class="metric-card-value">{{ v5 }}%</div>
+        <div class="metric-card-raw">{{ c5 }} of {{ n }} studies</div>
         <div class="metric-card-badge">
           <span class="risk-badge risk-{{ r5 }}">{{ r5 }}</span>
           {% if r5 == 'H' %}<span class="deduction-tag">−1 deducted</span>{% endif %}
